@@ -45,9 +45,7 @@ const projects: Project[] = [
   },
 ];
 
-function ProjectCard({ project, index, layout }: { project: Project; index: number; layout: "large" | "split" | "grid" }) {
-  const imageAspect = layout === "large" ? "aspect-[16/9]" : layout === "split" ? "aspect-[16/9]" : "aspect-[16/9]";
-
+function ProjectCard({ project, index }: { project: Project; index: number }) {
   return (
     <Link href={project.href} className="group block">
       <motion.article
@@ -57,7 +55,7 @@ function ProjectCard({ project, index, layout }: { project: Project; index: numb
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         className="relative"
       >
-        <div className={`relative overflow-hidden bg-[var(--surface)] ${imageAspect} border border-[var(--border)]`}>
+        <div className="relative overflow-hidden bg-[var(--surface)] aspect-[16/9] border border-[var(--border)]">
           <img
             src={`${import.meta.env.BASE_URL}${project.image}`}
             alt={project.title}
@@ -71,7 +69,7 @@ function ProjectCard({ project, index, layout }: { project: Project; index: numb
         </div>
         <div className="mt-5">
           <div className="flex items-baseline gap-4 mb-3">
-            <span className="text-[13px] text-[var(--muted-foreground)] font-mono tracking-widest leading-none">0{index + 1}</span>
+            {index > 0 && <span className="text-[13px] text-[var(--muted-foreground)] font-mono tracking-widest leading-none">0{index + 1}</span>}
             <h3 className="font-playfair text-3xl md:text-5xl font-bold leading-tight">
               {project.title}
             </h3>
@@ -96,8 +94,8 @@ export default function Work() {
           className="mb-20"
         >
           <div className="flex justify-between items-center mb-6">
-            <span className="text-[11px] font-mono text-[var(--muted-foreground)]">— 01</span>
             <span className="text-[11px] uppercase tracking-[0.2em] text-[var(--muted-foreground)]">Selected Work</span>
+            <span className="text-[11px] uppercase tracking-[0.2em] text-[var(--muted-foreground)]">— 01</span>
           </div>
           <div className="w-full h-[1px] bg-[var(--border)] mb-8" />
           <p className="font-playfair text-4xl md:text-6xl font-bold tracking-tight text-[var(--foreground)] max-w-3xl mb-8">Narrative depth and visual precision.</p>
@@ -105,10 +103,10 @@ export default function Work() {
         </motion.div>
 
         <div className="flex flex-col gap-32">
-          <ProjectCard project={projects[0]} index={0} layout="large" />
-          <ProjectCard project={projects[1]} index={1} layout="split" />
-          <ProjectCard project={projects[2]} index={2} layout="split" />
-          <ProjectCard project={projects[3]} index={3} layout="grid" />
+          <ProjectCard project={projects[0]} index={0} />
+          <ProjectCard project={projects[1]} index={1} />
+          <ProjectCard project={projects[2]} index={2} />
+          <ProjectCard project={projects[3]} index={3} />
         </div>
       </div>
     </section>

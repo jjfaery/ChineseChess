@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import { ArrowDown } from "lucide-react";
 import { Link } from "wouter";
 
 export default function Hero() {
@@ -54,15 +53,15 @@ export default function Hero() {
               <div className="w-12 h-[1px] bg-white/30"></div>
             </div>
           </motion.div>
-          
-          <motion.h1 
+
+          <motion.h1
             variants={item}
             className="font-playfair text-5xl md:text-[88px] lg:text-[100px] leading-[1.02] font-extrabold text-white mb-8 tracking-[-0.04em] max-w-5xl"
           >
             Designing bold visual systems for digital experiences.
           </motion.h1>
-          
-          <motion.p 
+
+          <motion.p
             variants={item}
             className="text-lg md:text-xl text-white/70 max-w-xl leading-relaxed font-light"
           >
@@ -70,32 +69,6 @@ export default function Hero() {
           </motion.p>
         </motion.div>
       </div>
-
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5, duration: 1 }}
-        className="absolute bottom-12 left-6 md:left-20 flex items-center gap-3 text-[13px] uppercase tracking-[0.1em] text-white/50"
-      >
-        <span className="relative overflow-hidden h-4 w-4">
-          <ArrowDown className="w-4 h-4 animate-bounce absolute inset-0" />
-        </span>
-        Scroll
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5, duration: 1 }}
-        className="absolute bottom-12 right-6 md:right-20 flex flex-col items-end gap-2"
-      >
-        <span className="text-[10px] uppercase tracking-widest text-white/20 font-sans">
-          — 00
-        </span>
-        <span className="text-[10px] text-white/30 font-mono tracking-widest">
-          01 / 05
-        </span>
-      </motion.div>
     </section>
   );
 }
