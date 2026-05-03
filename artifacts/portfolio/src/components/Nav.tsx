@@ -9,6 +9,7 @@ export default function Nav() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const links = [
+    { href: "/", label: "Home" },
     { href: "/work", label: "Work" },
     { href: "/about", label: "About" },
     { href: "/leadership", label: "Leadership" },
