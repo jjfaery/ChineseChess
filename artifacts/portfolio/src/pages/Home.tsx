@@ -5,7 +5,6 @@ import CaseStudies from "@/components/CaseStudies";
 import Leadership from "@/components/Leadership";
 import About from "@/components/About";
 import Contact from "@/components/Contact";
-import Footer from "@/components/Footer";
 
 function SectionMarker({ number, label }: { number: string; label: string }) {
   return (
@@ -33,7 +32,6 @@ export default function Home() {
       <About />
       <SectionMarker number="05" label="CONTACT" />
       <Contact />
-      <Footer />
     </main>
   );
 }

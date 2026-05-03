@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 
 export default function LeadershipPage() {
   return (
-    <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] pt-24">
+    <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] pt-24 pb-24">
       <div className="max-w-[1440px] mx-auto px-6 md:px-20 mb-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
