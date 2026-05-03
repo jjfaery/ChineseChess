@@ -1,17 +1,12 @@
-import logo from "@assets/IMG_3801_1777799555347.webp";
-
 export default function Footer() {
   return (
     <footer className="bg-[#0A0A0A] py-16 text-white">
       <div className="max-w-[1440px] mx-auto px-5 md:px-10">
         <div className="border-t border-white/10 pt-10 md:pt-12">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-            <div className="lg:col-span-5 space-y-5">
-              <img src={logo} alt="Jay Jay He Logo" className="h-8 md:h-10 w-auto object-contain" />
-              <div className="space-y-2 max-w-md">
-                <p className="font-playfair text-2xl md:text-3xl font-semibold tracking-tight text-white">JAY JAY HE</p>
-                <p className="text-[11px] uppercase tracking-[0.22em] text-white/45">Creative Director — Brand, Campaigns, Digital, Environmental</p>
-              </div>
+            <div className="lg:col-span-5 space-y-3">
+              <p className="font-playfair text-3xl md:text-4xl font-semibold tracking-tight text-white">JAY JAY HE</p>
+              <p className="text-[11px] uppercase tracking-[0.22em] text-white/45">Creative Director — Brand, Campaigns, Digital, Environmental</p>
             </div>
 
             <div className="lg:col-span-4 lg:col-start-8 flex flex-col items-start lg:items-end gap-5">
