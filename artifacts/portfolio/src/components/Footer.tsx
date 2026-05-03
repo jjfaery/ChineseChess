@@ -20,7 +20,7 @@ export default function Footer() {
           </div>
 
           <div className="flex justify-end items-center text-[11px] uppercase tracking-widest text-white/50">
-            <a href="#" className="hover:text-white transition-colors">LinkedIn</a>
+            <a href="https://www.linkedin.com/in/jayjayhe?trk=contact-info" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">LinkedIn</a>
           </div>
         </div>
 
