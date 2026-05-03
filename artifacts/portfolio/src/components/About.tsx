@@ -26,6 +26,11 @@ export default function About() {
             transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
             className="lg:col-span-5 relative"
           >
+            <div className="mb-6">
+              <p className="font-playfair text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight">
+                Jay Jay He
+              </p>
+            </div>
             <div className="aspect-[3/4] bg-[#0A0A0A] border border-white/10 overflow-hidden relative group">
                <img src={portrait} alt="Jay Jay He portrait" className="h-full w-full object-cover object-center" />
                <div className="absolute inset-0 bg-white/[0.02] mix-blend-overlay pointer-events-none" />
