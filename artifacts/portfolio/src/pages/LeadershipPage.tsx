@@ -10,12 +10,12 @@ export default function LeadershipPage() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-20"
+          className="mb-8 md:mb-10"
         >
-          <div className="flex justify-start items-center mb-6">
+          <div className="flex justify-start items-center mb-3">
             <span className="text-[11px] uppercase tracking-[0.2em] text-[var(--muted-foreground)]">Approach</span>
           </div>
-          <div className="w-full h-[1px] bg-[var(--border)] mb-8" />
+          <div className="w-full h-[1px] bg-[var(--border)] mb-0" />
         </motion.div>
       </div>
       <Leadership />
