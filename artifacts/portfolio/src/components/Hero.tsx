@@ -41,7 +41,10 @@ export default function Hero() {
               Creative direction across brand, campaigns, and digital experiences.
             </motion.h1>
             <motion.p variants={item} className="mt-8 text-base md:text-xl text-white/72 max-w-xl leading-relaxed font-light">
-              Creative Director shaping brand expression, digital design, and visual storytelling across modern platforms.
+              I’m a Creative Director working across brand, campaigns, digital, and environmental experiences.
+            </motion.p>
+            <motion.p variants={item} className="mt-4 text-base md:text-xl text-white/72 max-w-2xl leading-relaxed font-light">
+              My work focuses on shaping how ideas are communicated — translating strategy into clear, compelling visual systems and narratives that connect across every touchpoint. From identity development and campaign direction to digital and spatial execution, I’m interested in how design creates meaning and drives understanding.
             </motion.p>
             <motion.div variants={item} className="mt-10">
               <a href="#work" className="inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] text-white/80 hover:text-white transition-colors">
