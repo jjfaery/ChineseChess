@@ -38,7 +38,7 @@ export default function Hero() {
               <span className="text-[10px] md:text-[11px] uppercase tracking-[0.24em] text-white/60">Creative Director · Digital Design · Visual Impact</span>
             </motion.div>
             <motion.h1 variants={item} className="font-playfair text-[clamp(3.5rem,8vw,7.6rem)] leading-[0.9] font-extrabold text-white tracking-[-0.055em] max-w-4xl uppercase">
-              Designing bold visual systems for digital experiences.
+              Creative direction across brand, campaigns, and digital experiences.
             </motion.h1>
             <motion.p variants={item} className="mt-8 text-base md:text-xl text-white/72 max-w-xl leading-relaxed font-light">
               Creative Director shaping brand expression, digital design, and visual storytelling across modern platforms.
