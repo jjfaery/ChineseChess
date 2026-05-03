@@ -70,17 +70,17 @@ export default function CaseStudies() {
     <>
       <section className="py-24 md:py-32 bg-[#0D0D0D] border-y border-white/5">
         <div className="max-w-[1440px] mx-auto px-6 md:px-20">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+          <div className="flex flex-col gap-8 mb-16">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             >
-              <h2 className="font-playfair text-3xl md:text-5xl font-bold tracking-tight mb-4">
+              <h2 className="font-playfair text-3xl md:text-5xl font-bold tracking-tight mb-4 text-left">
                 Confidential Work
               </h2>
-              <p className="text-white/50 max-w-xl text-lg">
+              <p className="text-white/50 max-w-xl text-lg text-left">
                 Deep dives into brand strategy, campaign direction, and unreleased visual systems.
               </p>
             </motion.div>
@@ -92,7 +92,7 @@ export default function CaseStudies() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
                 onClick={() => setModalOpen(true)}
-                className="px-8 py-4 border border-white/20 hover:border-white hover:bg-white hover:text-black transition-all text-xs uppercase tracking-[0.15em] font-medium"
+                className="px-8 py-4 border border-white/20 hover:border-white hover:bg-white hover:text-black transition-all text-xs uppercase tracking-[0.15em] font-medium self-start"
               >
                 Unlock Access
               </motion.button>
@@ -102,7 +102,7 @@ export default function CaseStudies() {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="flex items-center gap-2 text-xs uppercase tracking-[0.15em] text-white/40"
+                className="flex items-center gap-2 text-xs uppercase tracking-[0.15em] text-white/40 self-start"
               >
                 <Unlock className="w-3.5 h-3.5" strokeWidth={1.5} />
                 <span>Access granted</span>

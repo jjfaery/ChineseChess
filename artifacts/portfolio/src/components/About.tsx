@@ -4,7 +4,6 @@ export default function About() {
   return (
     <section className="py-24 md:py-32 bg-[#0A0A0A] text-white">
       <div className="max-w-[1440px] mx-auto px-6 md:px-20">
-        
         <motion.div 
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -12,8 +11,7 @@ export default function About() {
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           className="mb-20"
         >
-          <div className="flex justify-between items-center mb-6">
-            <span className="text-[11px] font-mono text-white/30">— 04</span>
+          <div className="flex justify-start items-center mb-6">
             <span className="text-[11px] uppercase tracking-[0.2em] text-white/40">Profile</span>
           </div>
           <div className="w-full h-[1px] bg-white/10 mb-8" />

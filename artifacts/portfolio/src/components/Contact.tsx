@@ -12,8 +12,7 @@ export default function Contact() {
           className="mb-20"
         >
           <div className="w-full h-[1px] bg-white/10 mb-6" />
-          <div className="flex justify-between items-center mb-8">
-            <span className="text-[11px] font-mono text-white/30">— 05</span>
+          <div className="flex justify-start items-center mb-8">
             <span className="text-[11px] uppercase tracking-[0.2em] text-white/40">Contact</span>
           </div>
           <div className="w-full h-[1px] bg-white/10 mb-16" />
