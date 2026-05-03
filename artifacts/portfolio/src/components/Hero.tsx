@@ -35,16 +35,13 @@ export default function Hero() {
         <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-end min-h-[calc(100dvh-7rem)]">
           <div className="lg:col-span-6 xl:col-span-7 max-w-4xl">
             <motion.div variants={item} className="mb-6">
-              <span className="text-[10px] md:text-[11px] uppercase tracking-[0.24em] text-[#9F8CFF]">Creative Director · Digital Design · Visual Impact</span>
+              <span className="text-[10px] md:text-[11px] uppercase tracking-[0.24em] text-[#9F8CFF]">Creative Director · Brand Systems · Digital Experience</span>
             </motion.div>
             <motion.h1 variants={item} className="font-playfair text-[clamp(3.5rem,8vw,7.6rem)] leading-[0.9] font-extrabold text-white tracking-[-0.055em] max-w-4xl uppercase">
-              Creative direction across brand, campaigns, and digital experiences.
+              Designing systems that align brand, experience, and execution.
             </motion.h1>
             <motion.p variants={item} className="mt-8 text-base md:text-xl text-white/72 max-w-2xl leading-relaxed font-light">
-              I’m a Creative Director working across brand, campaigns, digital, and environmental experiences.
-            </motion.p>
-            <motion.p variants={item} className="mt-4 text-base md:text-xl text-white/72 max-w-2xl leading-relaxed font-light">
-              My work focuses on shaping how ideas are communicated — translating strategy into clear, compelling visual systems and narratives that connect across every touchpoint. From identity development and campaign direction to digital and spatial execution, I’m interested in how design creates meaning and drives understanding.
+              I translate strategy into cohesive systems—connecting brand, campaigns, digital, and environment into a unified experience.
             </motion.p>
             <motion.div variants={item} className="mt-10">
               <a href="#work" className="inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] text-white/80 hover:text-white transition-colors">
