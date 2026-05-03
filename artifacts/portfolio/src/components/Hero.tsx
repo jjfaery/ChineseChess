@@ -35,7 +35,7 @@ export default function Hero() {
         <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-end min-h-[calc(100dvh-7rem)]">
           <div className="lg:col-span-6 xl:col-span-7 max-w-4xl">
             <motion.div variants={item} className="mb-6">
-              <span className="text-[10px] md:text-[11px] uppercase tracking-[0.24em] text-white/60">Creative Director · Digital Design · Visual Impact</span>
+              <span className="text-[10px] md:text-[11px] uppercase tracking-[0.24em] text-[#9F8CFF]">Creative Director · Digital Design · Visual Impact</span>
             </motion.div>
             <motion.h1 variants={item} className="font-playfair text-[clamp(3.5rem,8vw,7.6rem)] leading-[0.9] font-extrabold text-white tracking-[-0.055em] max-w-4xl uppercase">
               Creative direction across brand, campaigns, and digital experiences.
