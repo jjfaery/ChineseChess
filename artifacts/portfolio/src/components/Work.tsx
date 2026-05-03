@@ -69,7 +69,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
         </div>
         <div className="mt-5">
           <div className="flex items-baseline gap-4 mb-3">
-            {index > 0 && <span className="text-[13px] text-[var(--muted-foreground)] font-mono tracking-widest leading-none">0{index + 1}</span>}
+            <span className="text-[13px] text-[var(--muted-foreground)] font-mono tracking-widest leading-none">0{index + 1}</span>
             <h3 className="font-playfair text-3xl md:text-5xl font-bold leading-tight">
               {project.title}
             </h3>
