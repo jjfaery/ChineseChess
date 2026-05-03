@@ -2,29 +2,24 @@ import { motion } from "framer-motion";
 
 const pillars = [
   {
-    num: "01",
-    title: "Creative Vision",
-    description: "Setting visual and conceptual direction anchoring brands and campaigns with clear intent."
-  },
-  {
-    num: "02",
-    title: "Art Direction",
-    description: "Orchestrating visual storytelling through photography, motion, and digital execution with editorial precision."
-  },
-  {
-    num: "03",
     title: "Brand Systems",
-    description: "Building scalable, robust design languages that extend fluidly across every consumer touchpoint."
+    description: "Building structured, scalable foundations that ensure consistency across products, campaigns, and environments."
   },
   {
-    num: "04",
+    title: "Campaign Direction",
+    description: "Translating strategy into clear creative direction—ensuring ideas carry through with intent and precision."
+  },
+  {
     title: "Digital Experience",
-    description: "Shaping connected digital ecosystems — from UI design systems to immersive web experiences — that express a brand's deepest character."
+    description: "Designing interfaces and systems that prioritize clarity, usability, and performance."
   },
   {
-    num: "05",
-    title: "Team Leadership",
-    description: "Empowering multidisciplinary creative teams to push boundaries while maintaining rigorous standards of craft."
+    title: "Spatial & Environmental Design",
+    description: "Extending brand into physical space—creating cohesive experiences beyond the screen."
+  },
+  {
+    title: "Creative Leadership",
+    description: "Leading teams and cross-functional work to align vision, elevate craft, and deliver at scale."
   }
 ];
 
@@ -37,39 +32,53 @@ export default function Leadership() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-8 md:mb-10"
+          className="mb-10 md:mb-12"
         >
           <div className="flex justify-start items-center mb-3">
-            <span className="text-[11px] uppercase tracking-[0.2em] text-white/40">III. Approach</span>
+            <span className="text-[11px] uppercase tracking-[0.2em] text-[#9F8CFF]">III. Approach</span>
           </div>
-          <div className="max-w-4xl pb-12 border-b border-white/10">
-            <p className="font-playfair text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight text-white mb-6 leading-tight">
-              Directing with purpose and precision.
+          <div className="max-w-4xl space-y-6 pb-10 border-b border-white/10">
+            <p className="font-playfair text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight text-white leading-tight">
+              Approach
             </p>
-            <p className="text-white/60 text-lg md:text-xl leading-relaxed font-light">
-              Creative leadership is about establishing a clear vision and empowering teams to execute it flawlessly across all mediums.
+            <div className="space-y-5 text-lg md:text-xl text-white/80 font-light leading-relaxed max-w-3xl">
+              <p>
+                I approach design as a system—aligning brand, communication, and execution into a cohesive direction that works across every touchpoint.
+              </p>
+              <p>
+                I’m drawn to work where design defines how a brand is experienced, not just how it looks.
+              </p>
+            </div>
+            <p className="text-[11px] uppercase tracking-[0.22em] text-white/35">
+              This approach carries across five core areas of expertise:
             </p>
           </div>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-8 lg:gap-12">
+        <div className="max-w-4xl">
+          <div className="border-t border-white/10" />
           {pillars.map((pillar, i) => (
             <motion.div
-              key={i}
+              key={pillar.title}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.8, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-              className="relative flex flex-col"
+              transition={{ duration: 0.8, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
+              className="py-8 md:py-10 border-b border-white/10"
             >
-              <div className="w-full h-[1px] bg-white/10 mb-6" />
-              <span className="block mb-4 text-[11px] text-white/30 font-mono tracking-widest">{pillar.num}</span>
-              <h3 className="text-xl font-semibold mb-4 text-white">{pillar.title}</h3>
-              <p className="text-white/60 text-sm leading-relaxed">
+              <h3 className="font-playfair text-2xl md:text-3xl font-bold tracking-tight text-white mb-4">
+                {pillar.title}
+              </h3>
+              <p className="text-white/60 text-base md:text-lg leading-relaxed max-w-2xl">
                 {pillar.description}
               </p>
             </motion.div>
           ))}
+          <div className="pt-10 md:pt-12 max-w-3xl">
+            <p className="text-white/70 text-lg md:text-xl font-light leading-relaxed">
+              The goal is not just to create design—but to ensure it works as a connected system across every touchpoint.
+            </p>
+          </div>
         </div>
       </div>
     </section>
