@@ -93,9 +93,8 @@ export default function Work() {
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           className="mb-20"
         >
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center mb-6">
             <span className="text-[11px] uppercase tracking-[0.2em] text-[var(--muted-foreground)]">Selected Work</span>
-            <span className="text-[11px] uppercase tracking-[0.2em] text-[var(--muted-foreground)]">— 01</span>
           </div>
           <div className="w-full h-[1px] bg-[var(--border)] mb-8" />
           <p className="font-playfair text-4xl md:text-6xl font-bold tracking-tight text-[var(--foreground)] max-w-3xl mb-8">Narrative depth and visual precision.</p>
