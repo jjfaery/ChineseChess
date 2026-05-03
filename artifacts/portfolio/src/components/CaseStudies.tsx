@@ -69,7 +69,7 @@ export default function CaseStudies() {
   return (
     <>
       <section className="py-24 md:py-32 bg-[#0D0D0D] border-y border-white/5">
-        <div className="max-w-[1440px] mx-auto px-6 md:px-20">
+        <div className="max-w-[1440px] mx-auto px-5 md:px-10">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -145,27 +145,14 @@ export default function CaseStudies() {
                       <Lock className="w-5 h-5 text-white/40 mb-5" strokeWidth={1.5} />
                       <h3 className="font-playfair text-2xl font-bold mb-2">{cs.label}</h3>
                       <p className="text-[11px] text-white/40 uppercase tracking-[0.2em] mb-5">{cs.category}</p>
-                      <span className="text-[10px] uppercase tracking-[0.3em] border-b border-white/20 pb-1 text-white/30">
-                        Password protected
-                      </span>
+                      <span className="text-[10px] uppercase tracking-[0.3em] border-b border-white/20 pb-1 text-white/30">Password protected</span>
                     </motion.div>
                   ) : (
-                    <motion.div
-                      key="unlocked"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.6 }}
-                      className="relative z-10 w-full h-full"
-                    >
-                      <Link
-                        href={cs.href}
-                        className="w-full h-full flex flex-col justify-end p-8 block group/link"
-                      >
+                    <motion.div key="unlocked" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }} className="relative z-10 w-full h-full">
+                      <Link href={cs.href} className="w-full h-full flex flex-col justify-end p-8 block group/link">
                         <div className="flex items-end justify-between gap-4">
                           <div>
-                            <p className="text-[11px] text-white/40 uppercase tracking-[0.2em] mb-2">
-                              {cs.category} · {cs.year}
-                            </p>
+                            <p className="text-[11px] text-white/40 uppercase tracking-[0.2em] mb-2">{cs.category} · {cs.year}</p>
                             <h3 className="font-playfair text-2xl font-bold mb-3 group-hover/link:text-white/80 transition-colors">{cs.label}</h3>
                             <p className="text-sm text-white/60 leading-relaxed max-w-sm">{cs.description}</p>
                           </div>
@@ -186,42 +173,17 @@ export default function CaseStudies() {
       <AnimatePresence>
         {modalOpen && (
           <>
-            <motion.div
-              key="backdrop"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="fixed inset-0 z-[80] bg-black/80 backdrop-blur-sm"
-              onClick={() => setModalOpen(false)}
-            />
+            <motion.div key="backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }} className="fixed inset-0 z-[80] bg-black/80 backdrop-blur-sm" onClick={() => setModalOpen(false)} />
 
-            <motion.div
-              key="modal"
-              initial={{ opacity: 0, y: 24, scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 24, scale: 0.97 }}
-              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-              className="fixed z-[90] inset-0 flex items-center justify-center px-6 pointer-events-none"
-            >
-              <motion.div
-                animate={shaking ? { x: [0, -8, 8, -6, 6, -3, 3, 0] } : {}}
-                transition={{ duration: 0.45 }}
-                className="pointer-events-auto w-full max-w-md bg-[#111] border border-white/10 p-10 relative"
-              >
-                <button
-                  onClick={() => setModalOpen(false)}
-                  className="absolute top-5 right-5 text-white/30 hover:text-white transition-colors focus:outline-none"
-                  aria-label="Close"
-                >
+            <motion.div key="modal" initial={{ opacity: 0, y: 24, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 24, scale: 0.97 }} transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }} className="fixed z-[90] inset-0 flex items-center justify-center px-6 pointer-events-none">
+              <motion.div animate={shaking ? { x: [0, -8, 8, -6, 6, -3, 3, 0] } : {}} transition={{ duration: 0.45 }} className="pointer-events-auto w-full max-w-md bg-[#111] border border-white/10 p-10 relative">
+                <button onClick={() => setModalOpen(false)} className="absolute top-5 right-5 text-white/30 hover:text-white transition-colors focus:outline-none" aria-label="Close">
                   <X className="w-4 h-4" />
                 </button>
 
                 <Lock className="w-5 h-5 text-white/30 mb-6" strokeWidth={1.5} />
                 <h2 className="font-playfair text-2xl font-bold mb-2">Confidential Access</h2>
-                <p className="text-white/50 text-sm mb-8 leading-relaxed">
-                  Enter the password to unlock all confidential case studies.
-                </p>
+                <p className="text-white/50 text-sm mb-8 leading-relaxed">Enter the password to unlock all confidential case studies.</p>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="relative">
@@ -237,34 +199,20 @@ export default function CaseStudies() {
                       className="w-full bg-[#0A0A0A] border border-white/10 focus:border-white/40 px-4 py-3.5 text-sm text-white placeholder-white/25 outline-none transition-colors pr-11"
                       autoComplete="off"
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword((v) => !v)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors focus:outline-none"
-                      tabIndex={-1}
-                      aria-label={showPassword ? "Hide password" : "Show password"}
-                    >
+                    <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors focus:outline-none" tabIndex={-1} aria-label={showPassword ? "Hide password" : "Show password"}>
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
 
                   <AnimatePresence>
                     {error && (
-                      <motion.p
-                        initial={{ opacity: 0, y: -4 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                        className="text-[12px] text-red-400/80 tracking-wide"
-                      >
+                      <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-[12px] text-red-400/80 tracking-wide">
                         {error}
                       </motion.p>
                     )}
                   </AnimatePresence>
 
-                  <button
-                    type="submit"
-                    className="w-full bg-white text-black text-xs uppercase tracking-[0.15em] font-medium py-4 hover:bg-white/90 transition-colors"
-                  >
+                  <button type="submit" className="w-full bg-white text-black text-xs uppercase tracking-[0.15em] font-medium py-4 hover:bg-white/90 transition-colors">
                     Unlock
                   </button>
                 </form>

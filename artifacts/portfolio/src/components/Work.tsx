@@ -84,8 +84,8 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
 
 export default function Work() {
   return (
-    <section className="py-24 md:py-32 bg-[var(--background)] relative z-10 text-[var(--foreground)]">
-      <div className="max-w-[1440px] mx-auto px-6 md:px-20">
+    <section id="work" className="py-24 md:py-32 bg-[var(--background)] relative z-10 text-[var(--foreground)] scroll-mt-24 md:scroll-mt-32">
+      <div className="max-w-[1440px] mx-auto px-5 md:px-10">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}

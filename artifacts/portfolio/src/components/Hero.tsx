@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import { Link } from "wouter";
 
 export default function Hero() {
   const container = {
@@ -23,50 +22,39 @@ export default function Hero() {
   };
 
   return (
-    <section className="relative h-[100dvh] w-full flex items-center justify-center overflow-hidden bg-black mt-[-64px] md:mt-[-72px]">
+    <section className="relative min-h-[100dvh] w-full overflow-hidden bg-black pt-16 md:pt-[72px]">
       <div className="absolute inset-0 z-0">
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          poster={`${import.meta.env.BASE_URL}hero-poster.png`}
-          className="w-full h-full object-cover opacity-60"
-        >
+        <video autoPlay muted loop playsInline poster={`${import.meta.env.BASE_URL}hero-poster.png`} className="w-full h-full object-cover opacity-55">
           <source src={`${import.meta.env.BASE_URL}hero-bg.mp4`} type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/80 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/45 to-black/85 pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_35%,rgba(255,255,255,0.16),transparent_35%),radial-gradient(circle_at_20%_10%,rgba(255,255,255,0.08),transparent_22%)] pointer-events-none" />
       </div>
 
-      <div className="relative z-10 w-full max-w-[1440px] px-6 md:px-20 pt-20">
-        <motion.div
-          variants={container}
-          initial="hidden"
-          animate="show"
-          className="max-w-5xl"
-        >
-          <motion.div variants={item} className="mb-6">
-            <div className="flex flex-col gap-4">
-              <span className="text-[11px] md:text-[13px] font-medium tracking-[0.2em] text-white/70 uppercase">
-                Creative Director · Digital Design · Brand
-              </span>
-              <div className="w-12 h-[1px] bg-white/30"></div>
-            </div>
+      <div className="relative z-10 max-w-[1440px] mx-auto px-5 md:px-10 py-14 md:py-20">
+        <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-end min-h-[calc(100dvh-7rem)]">
+          <div className="lg:col-span-6 xl:col-span-7 max-w-4xl">
+            <motion.div variants={item} className="mb-6">
+              <span className="text-[10px] md:text-[11px] uppercase tracking-[0.24em] text-white/60">Creative Director · Digital Design · Visual Impact</span>
+            </motion.div>
+            <motion.h1 variants={item} className="font-playfair text-[clamp(3.5rem,8vw,7.6rem)] leading-[0.9] font-extrabold text-white tracking-[-0.055em] max-w-4xl uppercase">
+              Designing bold visual systems for digital experiences.
+            </motion.h1>
+            <motion.p variants={item} className="mt-8 text-base md:text-xl text-white/72 max-w-xl leading-relaxed font-light">
+              Creative Director shaping brand expression, digital design, and visual storytelling across modern platforms.
+            </motion.p>
+            <motion.div variants={item} className="mt-10">
+              <a href="#work" className="inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] text-white/80 hover:text-white transition-colors">
+                View selected work <span>→</span>
+              </a>
+            </motion.div>
+          </div>
+
+          <motion.div variants={item} className="lg:col-span-5 xl:col-span-4 lg:justify-self-end lg:self-end max-w-sm lg:pb-6">
+            <p className="text-[10px] uppercase tracking-[0.22em] text-white/40 leading-relaxed text-right lg:text-left">
+              Creative leadership at the intersection of design, culture and business.
+            </p>
           </motion.div>
-
-          <motion.h1
-            variants={item}
-            className="font-playfair text-5xl md:text-[88px] lg:text-[100px] leading-[1.02] font-extrabold text-white mb-8 tracking-[-0.04em] max-w-5xl"
-          >
-            Designing bold visual systems for digital experiences.
-          </motion.h1>
-
-          <motion.p
-            variants={item}
-            className="text-lg md:text-xl text-white/70 max-w-xl leading-relaxed font-light"
-          >
-            Creative Director shaping brand expression, digital design, and visual storytelling across modern platforms.
-          </motion.p>
         </motion.div>
       </div>
     </section>

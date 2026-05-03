@@ -17,7 +17,6 @@ export default function Nav() {
   }, []);
 
   const links = [
-    { href: "/", label: "Home" },
     { href: "/work", label: "Work" },
     { href: "/about", label: "About" },
     { href: "/leadership", label: "Leadership" },
@@ -26,28 +25,20 @@ export default function Nav() {
 
   return (
     <>
-      <header className={`fixed top-0 left-0 right-0 z-50 h-16 md:h-[72px] transition-all duration-300 ${scrolled ? "bg-[#0A0A0A]/55 backdrop-blur-xl border-b border-white/10" : "bg-transparent border-b border-transparent"}`}>
-        <div className="max-w-[1440px] mx-auto px-6 md:px-20 h-full flex items-center justify-between">
+      <header className={`fixed top-0 left-0 right-0 z-50 h-16 md:h-[72px] transition-all duration-300 ${scrolled ? "bg-[#0A0A0A]/75 backdrop-blur-xl border-b border-white/10" : "bg-transparent border-b border-transparent"}`}>
+        <div className="max-w-[1440px] mx-auto px-5 md:px-10 h-full flex items-center justify-between">
           <Link href="/" className="hover:opacity-70 transition-opacity focus:outline-none" aria-label="Home">
             <img src={logo} alt="Jay Jay He" className="h-8 md:h-9 object-contain" />
           </Link>
 
-          <nav className="hidden md:flex items-center gap-10 text-[12px] font-medium tracking-[0.12em] uppercase text-white">
+          <nav className="hidden md:flex items-center gap-10 text-[11px] font-medium tracking-[0.16em] uppercase text-white">
             {links.map((link) => {
               const isActive = location === link.href || (location.startsWith(link.href) && link.href !== "/");
               return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`relative py-2 transition-colors duration-300 ${isActive ? "text-white" : "text-white/70 hover:text-white"}`}
-                >
+                <Link key={link.href} href={link.href} className={`relative py-2 transition-colors duration-300 ${isActive ? "text-white" : "text-white/70 hover:text-white"}`}>
                   {link.label}
                   {isActive && (
-                    <motion.div
-                      layoutId="activeNav"
-                      className="absolute bottom-0 left-0 right-0 h-[1px] bg-white"
-                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    />
+                    <motion.div layoutId="activeNav" className="absolute bottom-0 left-0 right-0 h-[1px] bg-white" transition={{ type: "spring", stiffness: 300, damping: 30 }} />
                   )}
                 </Link>
               );
@@ -62,13 +53,7 @@ export default function Nav() {
 
       <AnimatePresence>
         {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: "-100%" }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: "-100%" }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 z-[60] bg-[#0A0A0A] flex flex-col"
-          >
+          <motion.div initial={{ opacity: 0, y: "-100%" }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: "-100%" }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }} className="fixed inset-0 z-[60] bg-[#0A0A0A] flex flex-col">
             <div className="h-16 md:h-[72px] px-6 flex items-center justify-between border-b border-white/10">
               <Link href="/" onClick={() => setMobileMenuOpen(false)} className="hover:opacity-70 transition-opacity focus:outline-none" aria-label="Home">
                 <img src={logo} alt="Jay Jay He" className="h-8 md:h-9 object-contain" />
@@ -79,12 +64,7 @@ export default function Nav() {
             </div>
             <nav className="flex-1 flex flex-col justify-center px-12 gap-8 text-2xl uppercase tracking-widest font-medium">
               {links.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`transition-colors ${location === link.href ? "text-white" : "text-white/50"}`}
-                >
+                <Link key={link.href} href={link.href} onClick={() => setMobileMenuOpen(false)} className={`transition-colors ${location === link.href ? "text-white" : "text-white/50"}`}>
                   {link.label}
                 </Link>
               ))}

@@ -31,7 +31,7 @@ const pillars = [
 export default function Leadership() {
   return (
     <section className="py-24 md:py-32 bg-[#0A0A0A]">
-      <div className="max-w-[1440px] mx-auto px-6 md:px-20">
+      <div className="max-w-[1440px] mx-auto px-5 md:px-10">
         <motion.div 
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
