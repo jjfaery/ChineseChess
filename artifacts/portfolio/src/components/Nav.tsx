@@ -19,7 +19,7 @@ export default function Nav() {
   const links = [
     { href: "/work", label: "Work" },
     { href: "/about", label: "About" },
-    { href: "/leadership", label: "Leadership" },
+    { href: "/leadership", label: "Approach" },
     { href: "/contact", label: "Contact" },
   ];
 
