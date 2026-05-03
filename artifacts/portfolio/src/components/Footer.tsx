@@ -2,33 +2,33 @@ import logo from "@assets/IMG_3801_1777799555347.webp";
 
 export default function Footer() {
   return (
-    <footer className="bg-[#0A0A0A] py-10 text-white">
-      <div className="max-w-[1440px] mx-auto px-6 md:px-20">
-        <div className="w-full border-t border-white/10 pt-10" />
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 items-center justify-between mb-16">
-          <div className="flex justify-start">
-            <img
-              src={logo}
-              alt="Jay Jay He Logo"
-              className="h-5 w-auto object-contain opacity-60"
-            />
-          </div>
-          
-          <div className="flex justify-center text-center">
-            <span className="text-[10px] uppercase tracking-widest text-white/30">
-              Creative Director — Digital Design — Brand
-            </span>
+    <footer className="bg-[#0A0A0A] py-16 text-white">
+      <div className="max-w-[1440px] mx-auto px-5 md:px-10">
+        <div className="border-t border-white/10 pt-10 md:pt-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+            <div className="lg:col-span-5 space-y-5">
+              <img src={logo} alt="Jay Jay He Logo" className="h-8 md:h-10 w-auto object-contain" />
+              <div className="space-y-2 max-w-md">
+                <p className="font-playfair text-2xl md:text-3xl font-semibold tracking-tight text-white">JAY JAY HE</p>
+                <p className="text-[11px] uppercase tracking-[0.22em] text-white/45">Creative Director — Brand, Campaigns, Digital</p>
+              </div>
+            </div>
+
+            <div className="lg:col-span-4 lg:col-start-8 flex flex-col items-start lg:items-end gap-5">
+              <a href="#contact" className="text-sm md:text-base text-white hover:text-white/70 transition-colors">
+                Let’s connect →
+              </a>
+              <div className="flex flex-col items-start lg:items-end gap-2 text-[11px] uppercase tracking-[0.2em] text-white/50">
+                <a href="https://www.linkedin.com/in/jayjayhe?trk=contact-info" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">LinkedIn</a>
+                <a href="mailto:hello@example.com" className="hover:text-white transition-colors">Email</a>
+              </div>
+            </div>
           </div>
 
-          <div className="flex justify-end items-center text-[11px] uppercase tracking-widest text-white/50">
-            <a href="https://www.linkedin.com/in/jayjayhe?trk=contact-info" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">LinkedIn</a>
+          <div className="mt-14 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-[10px] uppercase tracking-[0.2em] text-white/30">
+            <span>© 2026 Jay Jay He</span>
+            <span>Creative Director — Brand, Campaigns, Digital</span>
           </div>
-        </div>
-
-        <div className="flex justify-between items-center text-[10px] text-white/20 uppercase tracking-widest">
-          <span>© {new Date().getFullYear()}</span>
-          <span>All rights reserved</span>
         </div>
       </div>
     </footer>
