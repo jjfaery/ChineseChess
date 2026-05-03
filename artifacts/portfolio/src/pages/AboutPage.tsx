@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 
 export default function AboutPage() {
   return (
-    <main className="min-h-screen bg-[#0A0A0A] text-white pt-24">
+    <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] pt-24">
       <div className="max-w-[1440px] mx-auto px-6 md:px-20 mb-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -12,13 +12,13 @@ export default function AboutPage() {
           className="pt-8"
         >
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-[11px] uppercase tracking-[0.2em] text-white/50">Profile</h1>
-            <span className="text-[11px] uppercase tracking-[0.2em] text-white/30 font-mono">2025</span>
+            <h1 className="text-[11px] uppercase tracking-[0.2em] text-[var(--muted-foreground)]">Profile</h1>
+            <span className="text-[11px] uppercase tracking-[0.2em] text-[var(--muted-foreground)] font-mono">2025</span>
           </div>
-          <h2 className="font-playfair text-5xl md:text-7xl font-bold tracking-tight text-white max-w-3xl pb-10">
+          <h2 className="font-playfair text-5xl md:text-7xl font-bold tracking-tight text-[var(--foreground)] max-w-3xl pb-10">
             About
           </h2>
-          <div className="w-full h-[1px] bg-white/10" />
+          <div className="w-full h-[1px] bg-[var(--border)]" />
         </motion.div>
       </div>
       <About />
