@@ -70,21 +70,27 @@ export default function CaseStudies() {
     <>
       <section className="py-24 md:py-32 bg-[#0D0D0D] border-y border-white/5">
         <div className="max-w-[1440px] mx-auto px-6 md:px-20">
-          <div className="flex flex-col gap-8 mb-16">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <h2 className="font-playfair text-3xl md:text-5xl font-bold tracking-tight mb-4 text-left">
-                II. Confidential Work
-              </h2>
-              <p className="text-white/50 max-w-xl text-lg text-left">
-                Deep dives into brand strategy, campaign direction, and unreleased visual systems.
-              </p>
-            </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="mb-20"
+          >
+            <div className="flex justify-start items-center mb-6">
+              <span className="text-[11px] uppercase tracking-[0.2em] text-white/40">II. Confidential Work</span>
+            </div>
+            <div className="w-full h-[1px] bg-white/10 mb-8" />
+            <p className="font-playfair text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight text-white mb-8 leading-tight max-w-4xl">
+              Confidential work and unreleased systems.
+            </p>
+            <p className="text-white/60 text-lg md:text-xl leading-relaxed font-light max-w-2xl">
+              Deep dives into brand strategy, campaign direction, and unreleased visual systems.
+            </p>
+            <div className="w-full h-[1px] bg-white/10 mt-12" />
+          </motion.div>
 
+          <div className="mb-20 flex justify-start">
             {!unlocked && (
               <motion.button
                 initial={{ opacity: 0, y: 20 }}
@@ -92,7 +98,7 @@ export default function CaseStudies() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
                 onClick={() => setModalOpen(true)}
-                className="px-8 py-4 border border-white/20 hover:border-white hover:bg-white hover:text-black transition-all text-xs uppercase tracking-[0.15em] font-medium self-start"
+                className="px-8 py-4 border border-white/20 hover:border-white hover:bg-white hover:text-black transition-all text-xs uppercase tracking-[0.15em] font-medium"
               >
                 Unlock Access
               </motion.button>
@@ -102,7 +108,7 @@ export default function CaseStudies() {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="flex items-center gap-2 text-xs uppercase tracking-[0.15em] text-white/40 self-start"
+                className="flex items-center gap-2 text-xs uppercase tracking-[0.15em] text-white/40"
               >
                 <Unlock className="w-3.5 h-3.5" strokeWidth={1.5} />
                 <span>Access granted</span>
@@ -110,7 +116,7 @@ export default function CaseStudies() {
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-10">
             {caseStudies.map((cs, i) => (
               <motion.div
                 key={cs.id}
@@ -119,7 +125,9 @@ export default function CaseStudies() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.8, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
                 className="group relative aspect-[16/9] bg-[#111] overflow-hidden flex items-center justify-center border border-white/5 cursor-pointer"
-                onClick={() => { if (!unlocked) setModalOpen(true); }}
+                onClick={() => {
+                  if (!unlocked) setModalOpen(true);
+                }}
                 style={{ cursor: unlocked ? "default" : "pointer" }}
               >
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:32px_32px]" />
@@ -221,7 +229,10 @@ export default function CaseStudies() {
                       ref={inputRef}
                       type={showPassword ? "text" : "password"}
                       value={password}
-                      onChange={(e) => { setPassword(e.target.value); setError(""); }}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        setError("");
+                      }}
                       placeholder="Password"
                       className="w-full bg-[#0A0A0A] border border-white/10 focus:border-white/40 px-4 py-3.5 text-sm text-white placeholder-white/25 outline-none transition-colors pr-11"
                       autoComplete="off"
