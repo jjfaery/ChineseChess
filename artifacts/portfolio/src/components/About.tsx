@@ -31,7 +31,7 @@ export default function About() {
                 Jay Jay He
               </p>
             </div>
-            <div className="mx-auto max-w-[280px] md:max-w-[320px] lg:max-w-[340px] aspect-[3/4] bg-[#0A0A0A] border border-white/10 overflow-hidden relative group">
+            <div className="max-w-[280px] md:max-w-[320px] lg:max-w-[340px] aspect-[3/4] bg-[#0A0A0A] border border-white/10 overflow-hidden relative group">
                <img src={portrait} alt="Jay Jay He portrait" className="h-full w-full object-cover object-center" />
                <div className="absolute inset-0 bg-white/[0.02] mix-blend-overlay pointer-events-none" />
             </div>
