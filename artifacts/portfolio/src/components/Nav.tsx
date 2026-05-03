@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
+import logo from "@assets/IMG_3801_1777799555347.webp";
 
 export default function Nav() {
   const [location] = useLocation();
@@ -24,9 +25,9 @@ export default function Nav() {
             aria-label="Home"
           >
             <img
-              src="http://images.squarespace-cdn.com/content/v1/554a9481e4b0ada23516d9fd/1453504037843-8XLB1T8BX9Q02ZW4NHOW/JayJayHe_Logo.png?format=1500w"
+              src={logo}
               alt="Jay Jay He"
-              className="h-8 md:h-9 invert brightness-0 invert-100"
+              className="h-8 md:h-9 object-contain"
             />
           </Link>
 
@@ -79,9 +80,9 @@ export default function Nav() {
                 aria-label="Home"
               >
                 <img
-                  src="http://images.squarespace-cdn.com/content/v1/554a9481e4b0ada23516d9fd/1453504037843-8XLB1T8BX9Q02ZW4NHOW/JayJayHe_Logo.png?format=1500w"
+                  src={logo}
                   alt="Jay Jay He"
-                  className="h-8 md:h-9 invert brightness-0 invert-100"
+                  className="h-8 md:h-9 object-contain"
                 />
               </Link>
               <button

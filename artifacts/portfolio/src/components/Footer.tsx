@@ -1,3 +1,5 @@
+import logo from "@assets/IMG_3801_1777799555347.webp";
+
 export default function Footer() {
   return (
     <footer className="bg-[#0A0A0A] py-10 text-white">
@@ -7,9 +9,9 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 items-center justify-between mb-16">
           <div className="flex justify-start">
             <img
-              src="http://images.squarespace-cdn.com/content/v1/554a9481e4b0ada23516d9fd/1453504037843-8XLB1T8BX9Q02ZW4NHOW/JayJayHe_Logo.png?format=1500w"
+              src={logo}
               alt="Jay Jay He Logo"
-              className="h-5 opacity-60 invert brightness-0 invert-100"
+              className="h-5 w-auto object-contain opacity-60"
             />
           </div>
           
