@@ -1,198 +1,108 @@
 import { motion } from "framer-motion";
 import { Link } from "wouter";
 
+const stats = [
+  { label: "Role", value: "Creative Director" },
+  { label: "Discipline", value: "Brand Identity / Systems" },
+  { label: "Year", value: "2023" },
+  { label: "Client", value: "Global Media Company" },
+];
+
+const gallery = ["/project-a-gal1.png", "/project-a-gal2.png", "/project-a-gal1.png"];
+
 export default function CaseStudyProjectA() {
   return (
-    <main className="min-h-screen bg-[#0A0A0A] text-white pt-24 pb-32">
-      {/* Header */}
-      <div className="max-w-[1440px] mx-auto px-6 md:px-20 pt-12 pb-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <p className="text-[11px] uppercase tracking-[0.2em] text-white/50 mb-8 flex items-center gap-4">
-            <span className="w-8 h-[1px] bg-white/20"></span>
-            CASE STUDY &mdash; CONFIDENTIAL
-          </p>
-          <h1 className="font-playfair text-6xl md:text-8xl font-bold tracking-tight text-white mb-12">
-            Brand Identity System
-          </h1>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-8 border-t border-white/10">
-            <div>
-              <span className="block text-[10px] uppercase tracking-widest text-white/40 mb-2">Category</span>
-              <span className="text-sm font-medium">Brand Identity & Visual Systems</span>
-            </div>
-            <div>
-              <span className="block text-[10px] uppercase tracking-widest text-white/40 mb-2">Year</span>
-              <span className="text-sm font-medium">2023</span>
-            </div>
-            <div>
-              <span className="block text-[10px] uppercase tracking-widest text-white/40 mb-2">Client</span>
-              <span className="text-sm font-medium">Global Media Company</span>
-            </div>
-            <div>
-              <span className="block text-[10px] uppercase tracking-widest text-white/40 mb-2">Role</span>
-              <span className="text-sm font-medium">Creative Director</span>
-            </div>
+    <main className="min-h-screen bg-[#0A0A0A] text-white pt-24 pb-24">
+      <div className="max-w-[1440px] mx-auto px-6 md:px-20 pt-12">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}>
+          <p className="text-[11px] uppercase tracking-[0.25em] text-white/45 mb-6">Case Study</p>
+          <h1 className="font-playfair text-6xl md:text-8xl font-bold tracking-tight mb-6">Brand Identity System</h1>
+          <p className="max-w-3xl text-xl md:text-2xl font-light text-white/75 leading-relaxed mb-12">A premium identity system built to unify a global media brand across broadcast, digital, and print touchpoints.</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 border-t border-white/10 pt-8">
+            {stats.map((item) => (
+              <div key={item.label}>
+                <div className="text-[10px] uppercase tracking-[0.22em] text-white/40 mb-2">{item.label}</div>
+                <div className="text-sm md:text-base text-white/85">{item.value}</div>
+              </div>
+            ))}
           </div>
         </motion.div>
       </div>
 
-      {/* Hero Image */}
-      <motion.div 
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 1 }}
-        className="w-full aspect-[21/9] md:aspect-[21/8] bg-[#111] relative overflow-hidden mb-24"
-      >
-        <img 
-          src="/project-a-hero.png" 
-          alt="Brand Identity System Hero" 
-          className="w-full h-full object-cover opacity-80 mix-blend-luminosity"
-          onError={(e) => {
-            // fallback if image fails
-            e.currentTarget.style.display = 'none';
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] to-transparent pointer-events-none"></div>
-      </motion.div>
-
-      {/* Brief & Challenge */}
-      <div className="max-w-[1440px] mx-auto px-6 md:px-20 mb-32">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-24">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-          >
-            <h2 className="text-[11px] uppercase tracking-[0.2em] text-white/40 mb-6">The Brief</h2>
-            <p className="text-xl md:text-2xl font-light text-white/80 leading-relaxed">
-              A global media brand required a comprehensive identity overhaul to unify its presence across 40+ international markets, establishing a coherent visual language that translates seamlessly from broadcast to digital platforms.
-            </p>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.1 }}
-          >
-            <h2 className="text-[11px] uppercase tracking-[0.2em] text-white/40 mb-6">The Challenge</h2>
-            <p className="text-lg md:text-xl font-light text-white/60 leading-relaxed">
-              The existing architecture was fragmented, leading to diluted brand equity. The challenge was to create a flexible yet rigorous system capable of accommodating diverse local content while maintaining strict global brand recognition.
-            </p>
-          </motion.div>
-        </div>
-      </div>
-
-      {/* Role & Scope */}
-      <div className="max-w-[1440px] mx-auto px-6 md:px-20 mb-32">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="py-12 border-y border-white/10"
-        >
-          <h2 className="text-[11px] uppercase tracking-[0.2em] text-white/40 mb-8">Role & Scope</h2>
-          <div className="flex flex-wrap gap-x-12 gap-y-4 text-lg font-medium text-white/90">
-            <span>Creative Direction</span>
-            <span className="text-white/20">&mdash;</span>
-            <span>Brand Strategy</span>
-            <span className="text-white/20">&mdash;</span>
-            <span>Visual Identity</span>
-            <span className="text-white/20">&mdash;</span>
-            <span>Design System</span>
-            <span className="text-white/20">&mdash;</span>
-            <span>Art Direction</span>
-            <span className="text-white/20">&mdash;</span>
-            <span>Typographic System</span>
-          </div>
+      <div className="max-w-[1600px] mx-auto px-0 md:px-6 mt-14 mb-24">
+        <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true, margin: "-100px" }} className="aspect-[21/9] md:aspect-[21/8] bg-[#111] overflow-hidden border-y border-white/10">
+          <img src="/project-a-hero.png" alt="Brand Identity System hero" className="h-full w-full object-cover opacity-90" onError={(e) => { e.currentTarget.style.display = "none"; }} />
         </motion.div>
       </div>
 
-      {/* Process */}
-      <div className="max-w-[1440px] mx-auto px-6 md:px-20 mb-32">
-        <h2 className="text-[11px] uppercase tracking-[0.2em] text-white/40 mb-12">Process</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-          {[
-            { step: "01", title: "Discovery", desc: "Auditing existing touchpoints and establishing core brand principles." },
-            { step: "02", title: "Direction", desc: "Developing multiple conceptual territories and typographic systems." },
-            { step: "03", title: "Delivery", desc: "Formalizing the chosen route into a scalable, documented design language." }
-          ].map((item, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: i * 0.1 }}
-            >
-              <div className="text-[13px] font-mono tracking-widest text-white/30 mb-4">{item.step}</div>
-              <h3 className="text-2xl font-playfair font-bold mb-4">{item.title}</h3>
-              <p className="text-white/60 font-light leading-relaxed">{item.desc}</p>
-            </motion.div>
-          ))}
-        </div>
-      </div>
+      <div className="max-w-[1440px] mx-auto px-6 md:px-20 space-y-24">
+        <section className="grid gap-10 md:grid-cols-2">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.25em] text-white/40 mb-4">Challenge</p>
+            <p className="text-lg md:text-xl text-white/70 leading-relaxed">The brand needed a clear system that could scale across more than forty markets without losing clarity, authority, or editorial precision.</p>
+          </div>
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.25em] text-white/40 mb-4">Creative Direction</p>
+            <p className="text-lg md:text-xl text-white/70 leading-relaxed">We established a restrained visual language built around typography, grids, and a monochrome image system to create a disciplined, high-end identity.</p>
+          </div>
+        </section>
 
-      {/* Gallery */}
-      <div className="max-w-[1440px] mx-auto px-6 md:px-20 mb-32">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="aspect-[3/4] bg-[#111] relative overflow-hidden"
-          >
-            <img src="/project-a-gal1.png" alt="Gallery image 1" className="w-full h-full object-cover opacity-70" onError={(e) => e.currentTarget.style.display = 'none'} />
-            <div className="absolute inset-0 bg-white/5 mix-blend-overlay pointer-events-none"></div>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="aspect-[3/4] bg-[#111] relative overflow-hidden mt-0 md:mt-24"
-          >
-            <img src="/project-a-gal2.png" alt="Gallery image 2" className="w-full h-full object-cover opacity-70" onError={(e) => e.currentTarget.style.display = 'none'} />
-            <div className="absolute inset-0 bg-white/5 mix-blend-overlay pointer-events-none"></div>
-          </motion.div>
-        </div>
-      </div>
+        <section className="border-t border-white/10 pt-10">
+          <p className="text-[11px] uppercase tracking-[0.25em] text-white/40 mb-8">Process</p>
+          <div className="grid gap-8 md:grid-cols-3">
+            {[
+              ["Discovery", "Audited existing touchpoints and mapped inconsistencies."],
+              ["System Design", "Defined grid logic, motion rules, and a typography hierarchy."],
+              ["Rollout", "Packaged the system for digital, print, and broadcast use."],
+            ].map(([title, text], i) => (
+              <div key={title} className="border border-white/10 p-6 bg-white/[0.02]">
+                <div className="text-[11px] uppercase tracking-[0.22em] text-white/35 mb-4">0{i + 1}</div>
+                <h3 className="font-playfair text-2xl mb-3">{title}</h3>
+                <p className="text-white/65 leading-relaxed">{text}</p>
+              </div>
+            ))}
+          </div>
+        </section>
 
-      {/* Impact Stats */}
-      <div className="max-w-[1440px] mx-auto px-6 md:px-20 mb-32 text-center">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-16 py-24 border-y border-white/10">
-          <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.8 }}>
-            <div className="font-playfair text-6xl md:text-8xl font-bold mb-4 text-white">40+</div>
-            <div className="text-[11px] uppercase tracking-[0.2em] text-white/50">Markets</div>
-          </motion.div>
-          <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.1 }}>
-            <div className="font-playfair text-6xl md:text-8xl font-bold mb-4 text-white">3</div>
-            <div className="text-[11px] uppercase tracking-[0.2em] text-white/50">Brand Tiers</div>
-          </motion.div>
-          <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.2 }}>
-            <div className="font-playfair text-6xl md:text-8xl font-bold mb-4 text-white">1</div>
-            <div className="text-[11px] uppercase tracking-[0.2em] text-white/50">Unified Language</div>
-          </motion.div>
-        </div>
-      </div>
+        <section className="grid gap-8 md:grid-cols-2">
+          <div className="border border-white/10 bg-white/[0.02] p-8 md:p-10">
+            <p className="text-[11px] uppercase tracking-[0.25em] text-white/40 mb-6">Execution</p>
+            <p className="text-white/70 leading-relaxed mb-6">The final system balanced rigor with flexibility: a bold type stack, measured spacing, and image treatments that could hold across every channel.</p>
+            <p className="text-white/90 text-lg italic leading-relaxed border-l border-white/20 pl-5">“The goal was to make the system feel inevitable — quiet, authoritative, and built to last.”</p>
+          </div>
+          <div className="border border-white/10 bg-white/[0.02] p-8 md:p-10">
+            <p className="text-[11px] uppercase tracking-[0.25em] text-white/40 mb-6">Outcome</p>
+            <p className="text-white/70 leading-relaxed">The new identity created a more coherent brand presence, clearer internal guidelines, and a premium visual foundation for future campaigns and digital products.</p>
+          </div>
+        </section>
 
-      {/* Footer Nav */}
-      <div className="max-w-[1440px] mx-auto px-6 md:px-20">
-        <div className="flex flex-col md:flex-row justify-between items-center py-12 gap-8">
-          <Link href="/work" className="group flex items-center gap-4 text-[11px] uppercase tracking-[0.2em] text-white/60 hover:text-white transition-colors">
-            <span className="w-8 h-[1px] bg-white/20 group-hover:bg-white transition-colors"></span>
-            Back to Work
-          </Link>
-          <Link href="/case-study/project-b" className="group flex flex-col items-center md:items-end text-center md:text-right">
-            <span className="text-[10px] uppercase tracking-widest text-white/40 mb-2">Next Project</span>
-            <span className="font-playfair text-3xl md:text-4xl font-bold group-hover:text-white/80 transition-colors">Campaign Direction</span>
-          </Link>
+        <section>
+          <div className="flex items-center justify-between mb-6">
+            <p className="text-[11px] uppercase tracking-[0.25em] text-white/40">Gallery</p>
+            <p className="text-[11px] uppercase tracking-[0.25em] text-white/25">Selected frames</p>
+          </div>
+          <div className="grid gap-6 md:grid-cols-3">
+            {gallery.map((src, i) => (
+              <div key={src + i} className="aspect-[4/5] overflow-hidden border border-white/10 bg-[#111]">
+                <img src={src} alt={`Project A gallery ${i + 1}`} className="h-full w-full object-cover opacity-85" onError={(e) => { e.currentTarget.style.display = "none"; }} />
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="grid gap-8 md:grid-cols-2">
+          <div className="border border-white/10 bg-white/[0.02] p-6 md:p-8 aspect-video">
+            <p className="text-[11px] uppercase tracking-[0.25em] text-white/40 mb-4">Video / Embed</p>
+            <div className="h-full w-full border border-dashed border-white/15 flex items-center justify-center text-white/35 text-sm">Placeholder video area</div>
+          </div>
+          <div className="border border-white/10 bg-white/[0.02] p-6 md:p-8 flex items-center">
+            <blockquote className="text-2xl md:text-3xl font-playfair leading-tight text-white/90">A case study layout that feels like an editorial spread rather than a standard article page.</blockquote>
+          </div>
+        </section>
+
+        <div className="flex flex-col md:flex-row justify-between items-center gap-8 pt-8 border-t border-white/10">
+          <Link href="/work" className="text-[11px] uppercase tracking-[0.25em] text-white/60 hover:text-white transition-colors">Back to Work</Link>
+          <Link href="/case-study/project-b" className="text-[11px] uppercase tracking-[0.25em] text-white/60 hover:text-white transition-colors">Next Project</Link>
         </div>
       </div>
     </main>
