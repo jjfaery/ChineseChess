@@ -10,7 +10,7 @@ export default function Footer() {
               <img src={logo} alt="Jay Jay He Logo" className="h-8 md:h-10 w-auto object-contain" />
               <div className="space-y-2 max-w-md">
                 <p className="font-playfair text-2xl md:text-3xl font-semibold tracking-tight text-white">JAY JAY HE</p>
-                <p className="text-[11px] uppercase tracking-[0.22em] text-white/45">Creative Director — Brand, Campaigns, Digital</p>
+                <p className="text-[11px] uppercase tracking-[0.22em] text-white/45">Creative Director — Brand, Campaigns, Digital, Environmental</p>
               </div>
             </div>
 
@@ -27,7 +27,6 @@ export default function Footer() {
 
           <div className="mt-14 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-[10px] uppercase tracking-[0.2em] text-white/30">
             <span>© 2026 Jay Jay He</span>
-            <span>Creative Director — Brand, Campaigns, Digital</span>
           </div>
         </div>
       </div>

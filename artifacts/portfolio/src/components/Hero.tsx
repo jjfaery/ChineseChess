@@ -40,7 +40,7 @@ export default function Hero() {
             <motion.h1 variants={item} className="font-playfair text-[clamp(3.5rem,8vw,7.6rem)] leading-[0.9] font-extrabold text-white tracking-[-0.055em] max-w-4xl uppercase">
               Creative direction across brand, campaigns, and digital experiences.
             </motion.h1>
-            <motion.p variants={item} className="mt-8 text-base md:text-xl text-white/72 max-w-xl leading-relaxed font-light">
+            <motion.p variants={item} className="mt-8 text-base md:text-xl text-white/72 max-w-2xl leading-relaxed font-light">
               I’m a Creative Director working across brand, campaigns, digital, and environmental experiences.
             </motion.p>
             <motion.p variants={item} className="mt-4 text-base md:text-xl text-white/72 max-w-2xl leading-relaxed font-light">
