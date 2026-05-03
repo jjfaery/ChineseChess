@@ -59,7 +59,7 @@ function ProjectCard({ project, index, layout }: { project: Project; index: numb
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         className={`${layout === "split" ? "w-full md:w-3/5" : ""} relative`}
       >
-        <div className={`relative overflow-hidden bg-[var(--surface)] ${imageAspect} border border-[var(--border)]`}> 
+        <div className={`relative overflow-hidden bg-[var(--surface)] ${imageAspect} border border-[var(--border)]`}>
           <img
             src={`${import.meta.env.BASE_URL}${project.image}`}
             alt={project.title}
@@ -75,7 +75,7 @@ function ProjectCard({ project, index, layout }: { project: Project; index: numb
 
       <div className={`${layout === "split" ? "w-full md:w-2/5 mt-8 md:mt-0" : "mt-5"}`}>
         <div className="flex items-baseline gap-4 mb-3">
-          <span className="text-[13px] text-[var(--muted-foreground)] font-mono tracking-widest leading-none">0{index + 1}</span>
+          {index > 0 && <span className="text-[13px] text-[var(--muted-foreground)] font-mono tracking-widest leading-none">0{index + 1}</span>}
           <h3 className={`${layout === "large" ? "text-3xl md:text-5xl" : layout === "split" ? "text-3xl md:text-4xl" : "text-2xl"} font-playfair font-bold leading-tight`}>
             {project.title}
           </h3>
