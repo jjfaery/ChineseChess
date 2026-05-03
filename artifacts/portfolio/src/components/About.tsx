@@ -62,31 +62,18 @@ export default function About() {
             <div>
               <h3 className="text-[11px] uppercase tracking-[0.2em] text-white/40 mb-10">Expertise</h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12">
-                <div className="flex flex-col">
-                  {[
-                    "Creative Direction",
-                    "Digital Design",
-                    "Graphic Design",
-                    "Visual Systems"
-                  ].map(skill => (
-                    <span key={skill} className="text-sm font-medium text-white/70 border-b border-white/10 pb-3 mb-3">
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-                <div className="flex flex-col">
-                  {[
-                    "Brand Expression",
-                    "Campaigns",
-                    "Art Direction",
-                    "Team Leadership"
-                  ].map(skill => (
-                    <span key={skill} className="text-sm font-medium text-white/70 border-b border-white/10 pb-3 mb-3">
-                      {skill}
-                    </span>
-                  ))}
-                </div>
+              <div className="grid grid-cols-1 gap-x-12">
+                {[
+                  "Brand Systems",
+                  "Campaign Direction",
+                  "Digital Experience",
+                  "Motion & Interaction",
+                  "Creative Leadership"
+                ].map(skill => (
+                  <span key={skill} className="text-sm font-medium text-white/70 border-b border-white/10 pb-3 mb-3">
+                    {skill}
+                  </span>
+                ))}
               </div>
 
               <p className="mt-16 text-[11px] font-mono tracking-widest text-white/30 uppercase">Est. &mdash;</p>
