@@ -49,12 +49,6 @@ export default function Hero() {
               </a>
             </motion.div>
           </div>
-
-          <motion.div variants={item} className="lg:col-span-5 xl:col-span-4 lg:justify-self-end lg:self-end max-w-sm lg:pb-6">
-            <p className="text-[10px] uppercase tracking-[0.22em] text-white/40 leading-relaxed text-right lg:text-left">
-              Creative leadership at the intersection of design, culture and business.
-            </p>
-          </motion.div>
         </motion.div>
       </div>
     </section>
