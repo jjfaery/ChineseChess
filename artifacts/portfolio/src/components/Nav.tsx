@@ -26,18 +26,18 @@ export default function Nav() {
             <img
               src="http://images.squarespace-cdn.com/content/v1/554a9481e4b0ada23516d9fd/1453504037843-8XLB1T8BX9Q02ZW4NHOW/JayJayHe_Logo.png?format=1500w"
               alt="Jay Jay He"
-              className="h-6 invert brightness-0 invert-100"
+              className="h-8 md:h-9 invert brightness-0 invert-100"
             />
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8 text-[13px] font-medium tracking-[0.05em] uppercase">
+          <nav className="hidden md:flex items-center gap-10 text-[12px] font-medium tracking-[0.12em] uppercase">
             {links.map((link) => {
               const isActive = location === link.href || (location.startsWith(link.href) && link.href !== "/");
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`relative py-2 transition-colors ${isActive ? "text-white" : "text-white/50 hover:text-white"}`}
+                  className={`relative py-2 transition-all duration-300 hover:tracking-[0.2em] ${isActive ? "text-white" : "text-white/50 hover:text-white"}`}
                 >
                   {link.label}
                   {isActive && (
@@ -81,7 +81,7 @@ export default function Nav() {
                 <img
                   src="http://images.squarespace-cdn.com/content/v1/554a9481e4b0ada23516d9fd/1453504037843-8XLB1T8BX9Q02ZW4NHOW/JayJayHe_Logo.png?format=1500w"
                   alt="Jay Jay He"
-                  className="h-6 invert brightness-0 invert-100"
+                  className="h-8 md:h-9 invert brightness-0 invert-100"
                 />
               </Link>
               <button

@@ -1,0 +1,109 @@
+Use the attached layout reference image as the visual direction to upgrade the current design. Match its overall composition, typography scale, dark editorial tone, spacing rhythm, project hierarchy, navigation treatment, and premium Creative Director feel.
+
+Keep Jay Jay He’s actual branding and logo from jayjayhe.com. Do not replace it with a generic text logo. The logo should feel larger, confident, and integrated into the layout.
+
+Main goal:
+Upgrade the current site into a senior Creative Director / Digital Design / Graphic Design Director portfolio that feels modernist, editorial, graphic, and high-end — not product-design-heavy, not generic, and not tech-startup-like.
+
+Key updates:
+
+1. Preserve current site foundation
+
+- Keep the current Replit site structure and functionality
+- Do not rebuild from scratch
+- Keep existing routes/pages
+- Keep current case study layout
+- Keep password-protected confidential work
+
+2. Match the layout reference
+   Use the reference image for:
+
+- Dark editorial look
+- Large bold typography
+- Strong left-aligned hero
+- Graphic grid structure
+- Asymmetric composition
+- Section numbering
+- Strong project hierarchy
+- Right-side or clear section navigation/orientation treatment if feasible
+- Premium black/white/gray palette with restrained accent color
+
+3. Hero
+   Revise the hero to feel like the reference:
+
+- Large, bold, tight headline
+- Left-aligned composition
+- Strong visual background or image treatment
+- More graphic and modernist, less generic video/tech
+- Better hierarchy between overline, headline, supporting copy, and CTA
+
+Hero copy:
+“Designing bold visual systems for digital experiences.”
+
+Supporting line:
+“Creative Director shaping brand expression, digital design, and visual storytelling across modern platforms.”
+
+4. Navigation
+   Keep the sticky black navigation bar.
+   Improve it to match the reference:
+
+- Larger real Jay Jay He logo
+- Clear nav items: Work, About, Leadership, Contact
+- Active state indicator so users know where they are
+- Refined spacing and hover states
+
+5. Work section
+   Update the current work section to match the reference:
+
+- One large featured project
+- Smaller supporting project cards
+- Non-uniform editorial grid
+- Strong image cropping
+- Clear project category/role labels
+- Premium hover interactions
+
+6. Confidential work
+   Keep the password gate.
+   Password remains:
+   bauhaus1919
+
+After unlocking, Project A and Project B must both link to working sample case study pages using the current case study layout.
+
+7. Leadership section
+   Update to match the reference structure and tone:
+
+- Creative Vision
+- Art Direction
+- Brand Systems
+- Digital Experience
+- Team Leadership
+
+Make this section feel graphic, structured, and senior-level.
+
+8. About and Contact
+   Make these sections more concise, editorial, and visually designed.
+   They should feel like part of the same premium system, not generic text blocks.
+
+9. Positioning
+   Remove product-design-lead language.
+   Use language around:
+
+- Creative direction
+- Digital design
+- Graphic design
+- Brand systems
+- Visual storytelling
+- Campaigns
+- Art direction
+- Team leadership
+
+10. Motion
+    Use subtle refined motion only:
+
+- smooth reveals
+- hover states
+- active nav state
+- no flashy effects
+
+Final result:
+Keep the current site, but visually upgrade it to match the attached reference image and Jay Jay He’s real brand identity. The site should feel like a top-tier Creative Director personal brand portfolio: modernist, graphic, editorial, confident, and highly intentional.

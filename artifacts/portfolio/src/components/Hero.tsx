@@ -44,7 +44,7 @@ export default function Hero() {
           variants={container}
           initial="hidden"
           animate="show"
-          className="max-w-4xl"
+          className="max-w-5xl"
         >
           <motion.div variants={item} className="mb-6">
             <div className="flex flex-col gap-4">
@@ -57,7 +57,7 @@ export default function Hero() {
           
           <motion.h1 
             variants={item}
-            className="font-playfair text-5xl md:text-[88px] lg:text-[100px] leading-[1.02] font-extrabold text-white mb-8 tracking-[-0.03em] max-w-4xl"
+            className="font-playfair text-5xl md:text-[88px] lg:text-[100px] leading-[1.02] font-extrabold text-white mb-8 tracking-[-0.04em] max-w-5xl"
           >
             Designing bold visual systems for digital experiences.
           </motion.h1>
@@ -71,6 +71,19 @@ export default function Hero() {
         </motion.div>
       </div>
 
+      {/* Right Edge Marker */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.5, duration: 1 }}
+        className="absolute right-6 md:right-12 top-1/2 -translate-y-1/2 origin-right -rotate-90 flex items-center gap-4"
+      >
+        <div className="w-12 h-[1px] bg-white/20"></div>
+        <span className="text-[10px] uppercase tracking-widest text-white/20 whitespace-nowrap font-sans">
+          CREATIVE DIRECTOR — DIGITAL DESIGN
+        </span>
+      </motion.div>
+
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -81,6 +94,20 @@ export default function Hero() {
           <ArrowDown className="w-4 h-4 animate-bounce absolute inset-0" />
         </span>
         Scroll
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.5, duration: 1 }}
+        className="absolute bottom-12 right-6 md:right-20 flex flex-col items-end gap-2"
+      >
+        <span className="text-[10px] uppercase tracking-widest text-white/20 font-sans">
+          — 00
+        </span>
+        <span className="text-[10px] text-white/30 font-mono tracking-widest">
+          01 / 05
+        </span>
       </motion.div>
     </section>
   );

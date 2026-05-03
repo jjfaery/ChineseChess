@@ -38,7 +38,7 @@ const projects = [
 
 export default function Work() {
   return (
-    <section className="py-24 md:py-32 bg-[#0A0A0A] relative z-10 border-t border-white/10">
+    <section className="py-24 md:py-32 bg-[#0A0A0A] relative z-10">
       <div className="max-w-[1440px] mx-auto px-6 md:px-20">
         <motion.div 
           initial={{ opacity: 0, y: 40 }}
@@ -47,10 +47,15 @@ export default function Work() {
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           className="mb-20"
         >
-          <h2 className="text-[13px] font-medium tracking-[0.2em] text-white/50 uppercase mb-4">Selected Work</h2>
-          <p className="font-playfair text-4xl md:text-6xl font-bold tracking-tight text-white max-w-3xl">
+          <div className="flex justify-between items-center mb-6">
+            <span className="text-[11px] font-mono text-white/30">— 01</span>
+            <span className="text-[11px] uppercase tracking-[0.2em] text-white/40">Selected Work</span>
+          </div>
+          <div className="w-full h-[1px] bg-white/10 mb-8" />
+          <p className="font-playfair text-4xl md:text-6xl font-bold tracking-tight text-white max-w-3xl mb-8">
             Narrative depth and visual precision.
           </p>
+          <div className="w-full h-[1px] bg-white/10" />
         </motion.div>
 
         <div className="flex flex-col gap-32">
@@ -84,8 +89,8 @@ export default function Work() {
             </p>
           </div>
 
-          {/* Project 2: Left Aligned Portrait */}
-          <div className="flex flex-col md:flex-row items-center gap-12 md:gap-20 group cursor-pointer">
+          {/* Project 2: Left Aligned Portrait with Offset */}
+          <div className="flex flex-col md:flex-row items-center gap-12 md:gap-20 group cursor-pointer md:ml-[8%]">
             <motion.div 
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -114,9 +119,9 @@ export default function Work() {
             </div>
           </div>
 
-          {/* Project 3: Right Aligned Wide */}
+          {/* Project 3: Right Aligned Wide with Offset */}
           <div className="flex flex-col-reverse md:flex-row items-center gap-12 md:gap-20 group cursor-pointer md:mt-20">
-            <div className="w-full md:w-2/5 flex flex-col">
+            <div className="w-full md:w-2/5 flex flex-col md:mr-[8%]">
               <div className="flex items-baseline gap-4 mb-6">
                 <span className="text-[13px] text-white/30 font-mono tracking-widest leading-none">03</span>
                 <h3 className="font-playfair text-3xl md:text-4xl font-bold leading-tight">{projects[2].title}</h3>
@@ -144,7 +149,7 @@ export default function Work() {
             </motion.div>
           </div>
 
-          {/* Project 4: Side by Side (if we want to expand the list) */}
+          {/* Project 4: Side by Side */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:mt-20">
              <div className="group cursor-pointer">
                 <motion.div 
