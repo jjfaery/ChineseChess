@@ -71,19 +71,6 @@ export default function Hero() {
         </motion.div>
       </div>
 
-      {/* Right Edge Marker */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5, duration: 1 }}
-        className="absolute right-6 md:right-12 top-1/2 -translate-y-1/2 origin-right -rotate-90 flex items-center gap-4"
-      >
-        <div className="w-12 h-[1px] bg-white/20"></div>
-        <span className="text-[10px] uppercase tracking-widest text-white/20 whitespace-nowrap font-sans">
-          CREATIVE DIRECTOR — DIGITAL DESIGN
-        </span>
-      </motion.div>
-
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

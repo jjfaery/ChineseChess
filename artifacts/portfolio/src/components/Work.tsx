@@ -8,7 +8,6 @@ type Project = {
   description: string;
   image: string;
   href: string;
-  featured?: boolean;
 };
 
 const projects: Project[] = [
@@ -19,7 +18,6 @@ const projects: Project[] = [
     description: "Establishing a holistic visual language bridging print, digital, and spatial touchpoints for a global luxury brand.",
     image: "work-1.png",
     href: "/case-study/project-a",
-    featured: true,
   },
   {
     id: 2,
@@ -48,17 +46,16 @@ const projects: Project[] = [
 ];
 
 function ProjectCard({ project, index, layout }: { project: Project; index: number; layout: "large" | "split" | "grid" }) {
-  const imageAspect = layout === "large" ? "aspect-[16/9]" : layout === "split" ? "aspect-[3/4]" : "aspect-[4/3]";
-  const showInlineNumber = layout !== "large";
+  const imageAspect = layout === "large" ? "aspect-[16/9]" : layout === "split" ? "aspect-[16/9]" : "aspect-[16/9]";
 
   return (
-    <Link href={project.href} className={`group block ${layout === "split" ? "md:flex md:items-center md:gap-20" : ""}`}>
+    <Link href={project.href} className="group block">
       <motion.article
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className={`${layout === "split" ? "w-full md:w-3/5" : ""} relative`}
+        className="relative"
       >
         <div className={`relative overflow-hidden bg-[var(--surface)] ${imageAspect} border border-[var(--border)]`}>
           <img
@@ -72,18 +69,17 @@ function ProjectCard({ project, index, layout }: { project: Project; index: numb
             <span className="text-[11px] uppercase tracking-[0.25em] text-[var(--muted-foreground)]">0{index + 1}</span>
           </div>
         </div>
-      </motion.article>
-
-      <div className={`${layout === "split" ? "w-full md:w-2/5 mt-8 md:mt-0" : "mt-5"}`}>
-        <div className="flex items-baseline gap-4 mb-3">
-          {showInlineNumber && <span className="text-[13px] text-[var(--muted-foreground)] font-mono tracking-widest leading-none">0{index + 1}</span>}
-          <h3 className={`${layout === "large" ? "text-3xl md:text-5xl" : layout === "split" ? "text-3xl md:text-4xl" : "text-2xl"} font-playfair font-bold leading-tight`}>
-            {project.title}
-          </h3>
+        <div className="mt-5">
+          <div className="flex items-baseline gap-4 mb-3">
+            <span className="text-[13px] text-[var(--muted-foreground)] font-mono tracking-widest leading-none">0{index + 1}</span>
+            <h3 className="font-playfair text-3xl md:text-5xl font-bold leading-tight">
+              {project.title}
+            </h3>
+          </div>
+          <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--muted-foreground)] mb-4 ml-[2.25rem]">— {project.category}</p>
+          <p className="text-[var(--muted-foreground)] text-lg leading-relaxed ml-[2.25rem] max-w-xl">{project.description}</p>
         </div>
-        <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--muted-foreground)] mb-4 ml-[2.25rem]">— {project.category}</p>
-        <p className="text-[var(--muted-foreground)] text-lg leading-relaxed ml-[2.25rem] max-w-xl">{project.description}</p>
-      </div>
+      </motion.article>
     </Link>
   );
 }
