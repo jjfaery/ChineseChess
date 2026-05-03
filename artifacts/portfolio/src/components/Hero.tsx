@@ -47,23 +47,26 @@ export default function Hero() {
           className="max-w-4xl"
         >
           <motion.div variants={item} className="mb-6">
-            <span className="text-[11px] md:text-[13px] font-medium tracking-[0.2em] text-white/70 uppercase">
-              Creative Director · Digital Design · Brand
-            </span>
+            <div className="flex flex-col gap-4">
+              <span className="text-[11px] md:text-[13px] font-medium tracking-[0.2em] text-white/70 uppercase">
+                Creative Director · Digital Design · Brand
+              </span>
+              <div className="w-12 h-[1px] bg-white/30"></div>
+            </div>
           </motion.div>
           
           <motion.h1 
             variants={item}
-            className="font-playfair text-5xl md:text-[84px] lg:text-[96px] leading-[1.05] font-extrabold text-white mb-8 tracking-[-0.03em] max-w-3xl"
+            className="font-playfair text-5xl md:text-[88px] lg:text-[100px] leading-[1.02] font-extrabold text-white mb-8 tracking-[-0.03em] max-w-4xl"
           >
-            Designing intelligence into digital experiences.
+            Designing bold visual systems for digital experiences.
           </motion.h1>
           
           <motion.p 
             variants={item}
             className="text-lg md:text-xl text-white/70 max-w-xl leading-relaxed font-light"
           >
-            Creative Director shaping visual systems, brand expression, campaigns, and digital experiences that communicate with precision and intent.
+            Creative Director shaping brand expression, digital design, and visual storytelling across modern platforms.
           </motion.p>
         </motion.div>
       </div>

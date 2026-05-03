@@ -1,0 +1,107 @@
+Please revise the current portfolio site again. The current version still does not fully match the goal of a senior Creative Director / Digital Design / Graphic Design Director portfolio.
+
+Main goal:
+Make the site feel much more art-directed, premium, memorable, and visually confident. It should not feel like a generic Replit-generated template or a one-page landing page.
+
+Key revisions:
+
+1. Overall look and feel:
+Push the design toward a high-end Creative Director portfolio:
+- More editorial
+- More visual
+- More brand-led
+- More graphic
+- More cinematic
+- Less tech startup
+- Less product design
+- Less template-like
+
+The site should feel like it belongs to someone with strong visual taste, creative leadership, and design authority.
+
+2. Structure and navigation:
+The site should not feel like one endless page. Create a stronger sense of separate areas:
+- Home
+- Work
+- About
+- Leadership
+- Contact
+
+Keep the sticky black navigation bar, but add a clear active state so users always know where they are. The active nav item should visually update while scrolling or when visiting each section/page.
+
+3. Hero:
+Keep the video background, but make it feel more premium and intentional. The video should feel abstract, refined, artistic, and connected to visual design, brand, motion, digital storytelling, or creative direction — not generic technology footage.
+
+Make the headline bolder, more memorable, and more visually composed.
+
+Suggested hero headline:
+“Designing bold visual systems for digital experiences.”
+
+Supporting line:
+“Creative Director shaping brand expression, digital design, and visual storytelling across modern platforms.”
+
+4. Typography:
+Make typography feel more custom and editorial:
+- Larger hero headline
+- Tighter line height
+- Stronger contrast between headings, body copy, and labels
+- More intentional spacing
+- Avoid default web typography
+
+5. Work section:
+Make the work section feel curated and gallery-like, not like a basic project grid. Use:
+- One large featured project
+- Smaller supporting projects
+- More dramatic image scale
+- Stronger cropping
+- Better hover states
+- Clear role/category labels
+
+The work should feel art-directed and premium even with placeholder content.
+
+6. Creative Director positioning:
+Remove any language that makes Jay Jay sound like a product design lead. Replace with language around:
+- creative direction
+- digital design
+- graphic design
+- brand systems
+- visual storytelling
+- campaigns
+- digital experiences
+- art direction
+- team leadership
+
+7. Leadership section:
+Make this section feel more senior and specific to creative direction. Use pillars such as:
+- Creative Vision
+- Art Direction
+- Brand Systems
+- Digital Experience
+- Team Leadership
+
+8. Section transitions:
+Add clearer section breaks so users feel movement through the site. Each section should have its own visual identity and rhythm, not just continuous scrolling blocks.
+
+9. Motion:
+Keep motion elegant and minimal:
+- smooth reveals
+- refined hover states
+- subtle transitions
+- no gimmicky effects
+
+10. Case studies:
+Keep the existing case study layout and preserve the password gate for confidential case studies.
+
+Also fix the confidential case study flow:
+- When the confidential section is unlocked using the password “bauhaus1919,” Project A and Project B must both link to working sample case study pages.
+- Create functioning placeholder case study pages for Project A and Project B using the existing case study structure.
+- Ensure the full user flow works:
+  1. User opens confidential section
+  2. User enters password “bauhaus1919”
+  3. Confidential projects are revealed
+  4. Project A and Project B are clickable
+  5. Each project opens its own case study page
+
+Do not remove or break the password protection feature.
+
+Final target:
+The site should feel like a top-tier Creative Director personal brand site — visually memorable, refined, structured, and competitive for senior creative director roles.

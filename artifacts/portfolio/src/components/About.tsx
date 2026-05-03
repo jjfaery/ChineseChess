@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 
 export default function About() {
   return (
-    <section className="py-24 md:py-32 bg-[#0A0A0A] text-white">
+    <section className="py-24 md:py-32 bg-[#0A0A0A] text-white border-t border-white/10">
       <div className="max-w-[1440px] mx-auto px-6 md:px-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-12 items-center">
           <motion.div 
@@ -11,10 +11,12 @@ export default function About() {
             transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
             className="lg:col-span-5 relative"
           >
-            <div className="aspect-[3/4] bg-[#111] border border-white/5 overflow-hidden">
-               <div className="w-full h-full flex items-center justify-center relative overflow-hidden">
-                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/5 via-transparent to-transparent opacity-50"></div>
-                 <div className="text-white/10 uppercase tracking-[1em] text-[10px] transform -rotate-90 origin-center whitespace-nowrap">Jay Jay He</div>
+            <div className="aspect-[3/4] bg-[#0A0A0A] border border-white/10 overflow-hidden relative group">
+               <div className="absolute inset-0 bg-white/[0.02] mix-blend-overlay pointer-events-none" />
+               <div className="w-full h-full flex flex-col items-center justify-center p-12 text-center text-white/5 font-playfair font-bold text-8xl tracking-widest leading-[0.8] select-none">
+                 <span>J</span>
+                 <span>J</span>
+                 <span>H</span>
                </div>
             </div>
           </motion.div>
@@ -54,6 +56,7 @@ export default function About() {
                   </span>
                 ))}
               </div>
+              <p className="mt-10 text-[11px] font-mono tracking-widest text-white/30 uppercase">Est. &mdash;</p>
             </div>
           </motion.div>
         </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Lock, Unlock, X, Eye, EyeOff } from "lucide-react";
+import { Lock, Unlock, X, Eye, EyeOff, ArrowUpRight } from "lucide-react";
+import { Link } from "wouter";
 
 const STORAGE_KEY = "jjh_cs_unlocked";
 const PASSWORD = "bauhaus1919";
@@ -13,6 +14,7 @@ const caseStudies = [
     description:
       "A comprehensive visual identity built for a global media company — from brand strategy through to full design system deployment across digital and print.",
     year: "2023",
+    href: "/case-study/project-a",
   },
   {
     id: 2,
@@ -21,6 +23,7 @@ const caseStudies = [
     description:
       "Integrated campaign spanning OOH, digital, and motion — directed from concept through delivery for a category-defining consumer brand launch.",
     year: "2022",
+    href: "/case-study/project-b",
   },
 ];
 
@@ -117,6 +120,7 @@ export default function CaseStudies() {
                 transition={{ duration: 0.8, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
                 className="group relative aspect-[16/9] bg-[#111] overflow-hidden flex items-center justify-center border border-white/5 cursor-pointer"
                 onClick={() => { if (!unlocked) setModalOpen(true); }}
+                style={{ cursor: unlocked ? "default" : "pointer" }}
               >
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:32px_32px]" />
 
@@ -143,20 +147,25 @@ export default function CaseStudies() {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.6 }}
-                      className="relative z-10 w-full h-full flex flex-col justify-end p-8"
+                      className="relative z-10 w-full h-full"
                     >
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <p className="text-[11px] text-white/40 uppercase tracking-[0.2em] mb-2">
-                            {cs.category} · {cs.year}
-                          </p>
-                          <h3 className="font-playfair text-2xl font-bold mb-3">{cs.label}</h3>
-                          <p className="text-sm text-white/60 leading-relaxed max-w-sm">{cs.description}</p>
+                      <Link
+                        href={cs.href}
+                        className="w-full h-full flex flex-col justify-end p-8 block group/link"
+                      >
+                        <div className="flex items-end justify-between gap-4">
+                          <div>
+                            <p className="text-[11px] text-white/40 uppercase tracking-[0.2em] mb-2">
+                              {cs.category} · {cs.year}
+                            </p>
+                            <h3 className="font-playfair text-2xl font-bold mb-3 group-hover/link:text-white/80 transition-colors">{cs.label}</h3>
+                            <p className="text-sm text-white/60 leading-relaxed max-w-sm">{cs.description}</p>
+                          </div>
+                          <div className="shrink-0 mb-1 w-8 h-8 border border-white/20 flex items-center justify-center group-hover/link:border-white/60 group-hover/link:bg-white/5 transition-all">
+                            <ArrowUpRight className="w-4 h-4 text-white/40 group-hover/link:text-white transition-colors" strokeWidth={1.5} />
+                          </div>
                         </div>
-                        <div className="shrink-0 mt-1">
-                          <Unlock className="w-4 h-4 text-white/30" strokeWidth={1.5} />
-                        </div>
-                      </div>
+                      </Link>
                     </motion.div>
                   )}
                 </AnimatePresence>

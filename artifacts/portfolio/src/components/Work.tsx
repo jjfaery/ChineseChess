@@ -68,14 +68,19 @@ export default function Work() {
                 alt={projects[0].title}
                 className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-1000 ease-out"
               />
-              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-center items-center text-center p-8 backdrop-blur-sm">
-                <span className="text-[11px] uppercase tracking-[0.2em] text-white/70 mb-4">{projects[0].category}</span>
-                <p className="text-white text-lg max-w-md">{projects[0].description}</p>
+              <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/40 to-transparent pointer-events-none" />
+              <div className="absolute bottom-8 left-8 right-8 flex justify-between items-end">
+                <div className="overflow-hidden">
+                   <span className="block transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-[0.16,1,0.3,1] text-[11px] uppercase tracking-widest text-white font-medium bg-black/50 px-4 py-2 backdrop-blur-md border border-white/10 rounded-full">View Project</span>
+                </div>
               </div>
             </motion.div>
-            <h3 className="font-playfair text-3xl md:text-5xl font-bold mb-3">{projects[0].title}</h3>
-            <p className="text-[13px] uppercase tracking-wider text-white/50">
-              {projects[0].category}
+            <div className="flex items-baseline gap-4 mb-3">
+              <span className="text-[13px] text-white/30 font-mono tracking-widest leading-none">01</span>
+              <h3 className="font-playfair text-3xl md:text-5xl font-bold leading-tight">{projects[0].title}</h3>
+            </div>
+            <p className="text-[13px] uppercase tracking-wider text-white/50 ml-[2.25rem]">
+              &mdash; {projects[0].category}
             </p>
           </div>
 
@@ -86,40 +91,56 @@ export default function Work() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              className="w-full md:w-3/5 aspect-[3/4] overflow-hidden bg-white/5"
+              className="w-full md:w-3/5 aspect-[3/4] overflow-hidden bg-white/5 relative"
             >
               <img 
                 src={`${import.meta.env.BASE_URL}${projects[1].image}`} 
                 alt={projects[1].title}
                 className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-1000 ease-out"
               />
+              <div className="absolute bottom-8 left-8 right-8 flex justify-between items-end">
+                <div className="overflow-hidden">
+                   <span className="block transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-[0.16,1,0.3,1] text-[11px] uppercase tracking-widest text-white font-medium bg-black/50 px-4 py-2 backdrop-blur-md border border-white/10 rounded-full">View Project</span>
+                </div>
+              </div>
             </motion.div>
             <div className="w-full md:w-2/5 flex flex-col">
-              <span className="text-[11px] uppercase tracking-[0.2em] text-white/50 mb-4">{projects[1].category}</span>
-              <h3 className="font-playfair text-3xl md:text-4xl font-bold mb-6 leading-tight">{projects[1].title}</h3>
-              <p className="text-white/70 text-lg leading-relaxed">{projects[1].description}</p>
+              <div className="flex items-baseline gap-4 mb-6">
+                <span className="text-[13px] text-white/30 font-mono tracking-widest leading-none">02</span>
+                <h3 className="font-playfair text-3xl md:text-4xl font-bold leading-tight">{projects[1].title}</h3>
+              </div>
+              <p className="text-[11px] uppercase tracking-[0.2em] text-white/50 mb-6 ml-[2.25rem]">&mdash; {projects[1].category}</p>
+              <p className="text-white/70 text-lg leading-relaxed ml-[2.25rem]">{projects[1].description}</p>
             </div>
           </div>
 
           {/* Project 3: Right Aligned Wide */}
           <div className="flex flex-col-reverse md:flex-row items-center gap-12 md:gap-20 group cursor-pointer md:mt-20">
-            <div className="w-full md:w-2/5 flex flex-col md:items-end md:text-right">
-              <span className="text-[11px] uppercase tracking-[0.2em] text-white/50 mb-4">{projects[2].category}</span>
-              <h3 className="font-playfair text-3xl md:text-4xl font-bold mb-6 leading-tight">{projects[2].title}</h3>
-              <p className="text-white/70 text-lg leading-relaxed max-w-md">{projects[2].description}</p>
+            <div className="w-full md:w-2/5 flex flex-col">
+              <div className="flex items-baseline gap-4 mb-6">
+                <span className="text-[13px] text-white/30 font-mono tracking-widest leading-none">03</span>
+                <h3 className="font-playfair text-3xl md:text-4xl font-bold leading-tight">{projects[2].title}</h3>
+              </div>
+              <p className="text-[11px] uppercase tracking-[0.2em] text-white/50 mb-6 ml-[2.25rem]">&mdash; {projects[2].category}</p>
+              <p className="text-white/70 text-lg leading-relaxed max-w-md ml-[2.25rem]">{projects[2].description}</p>
             </div>
             <motion.div 
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-              className="w-full md:w-3/5 aspect-[16/9] overflow-hidden bg-white/5"
+              className="w-full md:w-3/5 aspect-[16/9] overflow-hidden bg-white/5 relative"
             >
               <img 
                 src={`${import.meta.env.BASE_URL}${projects[2].image}`} 
                 alt={projects[2].title}
                 className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-1000 ease-out"
               />
+              <div className="absolute bottom-8 left-8 right-8 flex justify-between items-end">
+                <div className="overflow-hidden">
+                   <span className="block transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-[0.16,1,0.3,1] text-[11px] uppercase tracking-widest text-white font-medium bg-black/50 px-4 py-2 backdrop-blur-md border border-white/10 rounded-full">View Project</span>
+                </div>
+              </div>
             </motion.div>
           </div>
 
@@ -131,17 +152,25 @@ export default function Work() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-100px" }}
                   transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                  className="aspect-[4/3] w-full overflow-hidden bg-white/5 mb-6"
+                  className="aspect-[4/3] w-full overflow-hidden bg-white/5 mb-6 relative"
                 >
                   <img 
                     src={`${import.meta.env.BASE_URL}${projects[3].image}`} 
                     alt={projects[3].title}
                     className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-1000 ease-out"
                   />
+                  <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end">
+                    <div className="overflow-hidden">
+                       <span className="block transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-[0.16,1,0.3,1] text-[11px] uppercase tracking-widest text-white font-medium bg-black/50 px-4 py-2 backdrop-blur-md border border-white/10 rounded-full">View Project</span>
+                    </div>
+                  </div>
                 </motion.div>
-                <h3 className="font-playfair text-2xl font-bold mb-2">{projects[3].title}</h3>
-                <p className="text-[11px] uppercase tracking-wider text-white/50">
-                  {projects[3].category}
+                <div className="flex items-baseline gap-4 mb-2">
+                  <span className="text-[11px] text-white/30 font-mono tracking-widest leading-none">04</span>
+                  <h3 className="font-playfair text-2xl font-bold">{projects[3].title}</h3>
+                </div>
+                <p className="text-[11px] uppercase tracking-wider text-white/50 ml-[2rem]">
+                  &mdash; {projects[3].category}
                 </p>
              </div>
           </div>

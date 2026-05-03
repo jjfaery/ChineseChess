@@ -8,6 +8,8 @@ import WorkPage from "@/pages/WorkPage";
 import AboutPage from "@/pages/AboutPage";
 import LeadershipPage from "@/pages/LeadershipPage";
 import ContactPage from "@/pages/ContactPage";
+import CaseStudyProjectA from "@/pages/CaseStudyProjectA";
+import CaseStudyProjectB from "@/pages/CaseStudyProjectB";
 import Layout from "@/components/Layout";
 
 const queryClient = new QueryClient();
@@ -21,6 +23,8 @@ function Router() {
         <Route path="/about" component={AboutPage} />
         <Route path="/leadership" component={LeadershipPage} />
         <Route path="/contact" component={ContactPage} />
+        <Route path="/case-study/project-a" component={CaseStudyProjectA} />
+        <Route path="/case-study/project-b" component={CaseStudyProjectB} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

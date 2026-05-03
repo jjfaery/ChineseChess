@@ -30,3 +30,39 @@ id = "dRSXWJci4GFb6nv-yBy1X"
 uri = "file://artifacts/portfolio/public/work-4.png"
 type = "image"
 title = "Visual system typography"
+
+[[generated]]
+id = "U8IFN4UV4NZ5rvyEmjEpA"
+uri = "file://artifacts/portfolio/public/project-a-hero.png"
+type = "image"
+title = "Brand identity moodboard"
+
+[[generated]]
+id = "FgtvaI6jazwqbIEK03g-u"
+uri = "file://artifacts/portfolio/public/project-a-gal1.png"
+type = "image"
+title = "Minimalist typography poster"
+
+[[generated]]
+id = "Vav3A6EiIv4e_PxkZqa5A"
+uri = "file://artifacts/portfolio/public/project-a-gal2.png"
+type = "image"
+title = "Textured business card"
+
+[[generated]]
+id = "JaMPmQm0gd3iGFtTQYbSw"
+uri = "file://artifacts/portfolio/public/project-b-hero.png"
+type = "image"
+title = "Cinematic campaign photo"
+
+[[generated]]
+id = "oAEZjj3OSNofvAUJFf0vO"
+uri = "file://artifacts/portfolio/public/project-b-gal1.png"
+type = "image"
+title = "Fashion campaign shadow"
+
+[[generated]]
+id = "a93_Gep4QXMsSjpyKlK_l"
+uri = "file://artifacts/portfolio/public/project-b-gal2.png"
+type = "image"
+title = "Moody outdoor campaign"

@@ -2,20 +2,24 @@ import { motion } from "framer-motion";
 
 const pillars = [
   {
+    num: "01",
     title: "Creative Vision",
     description: "Setting visual and conceptual direction anchoring brands and campaigns with clear intent."
   },
   {
-    title: "Visual Systems",
-    description: "Building scalable design languages and brand systems for every touchpoint, ensuring narrative consistency."
+    num: "02",
+    title: "Art Direction",
+    description: "Orchestrating visual storytelling through photography, motion, and digital execution with editorial precision."
   },
   {
-    title: "Creative Leadership",
-    description: "Building and directing multidisciplinary creative teams, fostering a fearless and collaborative creative culture."
+    num: "03",
+    title: "Brand Systems",
+    description: "Building scalable, robust design languages that extend fluidly across every consumer touchpoint."
   },
   {
-    title: "Craft & Intent",
-    description: "Holding a precise standard for craft — every typographic choice, composition, and motion decision is deliberate."
+    num: "04",
+    title: "Team Leadership",
+    description: "Empowering multidisciplinary creative teams to push boundaries while maintaining rigorous standards of craft."
   }
 ];
 
@@ -38,15 +42,17 @@ export default function Leadership() {
             </p>
           </motion.div>
 
-          <div className="lg:col-span-6 lg:col-start-7 grid grid-cols-1 md:grid-cols-2 gap-12">
+          <div className="lg:col-span-6 lg:col-start-7 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-16">
             {pillars.map((pillar, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                className="border-t border-white/20 pt-8"
+                className="relative"
               >
+                <div className="absolute top-0 left-0 w-full h-[1px] bg-white/10" />
+                <span className="block pt-6 mb-4 text-[11px] text-white/30 font-mono tracking-widest">{pillar.num}</span>
                 <h3 className="text-xl font-semibold mb-4 text-white">{pillar.title}</h3>
                 <p className="text-white/60 text-sm leading-relaxed">
                   {pillar.description}

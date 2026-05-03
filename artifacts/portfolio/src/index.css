@@ -79,6 +79,17 @@
     /* Force dark background */
     background-color: #0A0A0A;
     color: #FFFFFF;
+    cursor: default;
+  }
+
+  button, a, [role="button"], select, input[type="submit"], input[type="button"] {
+    cursor: pointer;
+  }
+}
+
+@layer utilities {
+  .font-playfair {
+    font-family: var(--font-playfair);
   }
 }
 
@@ -87,6 +98,6 @@ html {
 }
 
 ::selection {
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
+  background: #fff;
+  color: #0A0A0A;
 }
