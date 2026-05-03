@@ -1,7 +1,7 @@
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 
 export default function Hero() {
-  const container = {
+  const container: Variants = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
@@ -12,7 +12,7 @@ export default function Hero() {
     },
   };
 
-  const item = {
+  const item: Variants = {
     hidden: { opacity: 0, y: 20 },
     show: {
       opacity: 1,

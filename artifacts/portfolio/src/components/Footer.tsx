@@ -6,7 +6,7 @@ export default function Footer() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
             <div className="lg:col-span-5 space-y-3">
               <p className="font-playfair text-3xl md:text-4xl font-semibold tracking-tight text-white">JAY JAY HE</p>
-              <p className="text-[11px] uppercase tracking-[0.22em] text-white/45">Creative Director — Brand, Campaigns, Digital, Environmental</p>
+              <p className="text-[11px] uppercase tracking-[0.22em] text-white/45">Creative Director — Brand, Campaigns, Digital, Environmental Experiences</p>
             </div>
 
             <div className="lg:col-span-4 lg:col-start-8 flex flex-col items-start lg:items-end gap-5">
