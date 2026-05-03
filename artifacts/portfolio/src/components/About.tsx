@@ -5,21 +5,21 @@ export default function About() {
   return (
     <section className="py-24 md:py-32 bg-[#0A0A0A] text-white">
       <div className="max-w-[1440px] mx-auto px-5 md:px-10">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-20"
+          className="mb-8 md:mb-10"
         >
-          <div className="flex justify-start items-center mb-6">
-            <span className="text-[11px] uppercase tracking-[0.2em] text-white/40">IV. Profile</span>
+          <div className="flex justify-start items-center mb-3">
+            <span className="text-[11px] uppercase tracking-[0.2em] text-white/40">Profile</span>
           </div>
-          <div className="w-full h-[1px] bg-white/10 mb-8" />
+          <div className="w-full h-[1px] bg-white/10" />
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-12 items-start">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true, margin: "-100px" }}
@@ -32,7 +32,7 @@ export default function About() {
             </div>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
