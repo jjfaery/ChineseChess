@@ -1,0 +1,99 @@
+Create a brand new portfolio website for Jay Jay He from scratch using http://www.jayjayhe.com/ only as a reference for the existing logo, identity, and work themes. Do not copy the old layout or current template.
+
+The goal is a top-tier Creative Director / Product Design leader portfolio: editorial, cinematic, minimal, confident, and highly custom. It should feel premium, authored, and senior — not like a generic template.
+
+Position Jay Jay as a Creative Director focused on AI-driven data products, product design leadership, design systems, creative direction, and business impact.
+
+Use this art direction:
+
+Visual tone:
+- Black / near-black foundation
+- White and soft gray typography
+- One restrained accent color only
+- Minimal, precise, high-end
+- Editorial, not startup-template
+- Confident, not flashy
+
+Typography:
+- Use a modern grotesk or neo-grotesk font
+- Hero headline: very large, tight, bold, 64–84px desktop
+- H2: 36–48px
+- Body: 16–18px
+- Body line-height: 1.4–1.5
+- Avoid loose paragraph spacing
+- Typography should create authority and visual tension
+
+Layout:
+- Use a 12-column grid
+- Max content width: 1280–1440px
+- Desktop side padding: around 80px
+- Mobile padding: around 24px
+- Use asymmetric composition and varied spacing
+- Avoid uniform stacked sections
+- Use a rhythm of tight and loose spacing: 24 / 32 / 80 / 120 / 160px
+
+Navigation:
+- Sticky black top navigation that always stays visible while scrolling
+- Height around 64–72px
+- Larger, more prominent Jay Jay He logo on the left
+- Nav items on the right: Work, About, Leadership, Contact
+- Clean hover states and subtle active states
+- Add a subtle bottom divider
+
+Homepage hero:
+- Make the hero bold, memorable, and leadership-driven
+- Use a small overline, a large statement headline, and a short supporting sentence
+- It should immediately signal Creative Director authority, product design leadership, AI/data platform experience, and business impact
+- Avoid long intro paragraphs
+
+Suggested placeholder hero direction:
+“Designing AI-driven platforms that transform how data is understood and used.”
+Supporting line:
+“Creative Director and Product Design leader shaping systems, experiences, and strategy for complex digital products.”
+
+Selected Work:
+- Create a curated, editorial work section
+- Use 1 large featured project and several smaller supporting projects
+- Avoid a uniform card grid
+- Use varied scale, strong image treatment, intentional cropping, and premium hover interactions
+- Cards should include title, category, role, and short descriptor
+- Use placeholder content and images for now, but make the structure easy to replace later
+
+Case studies:
+- Keep the current case study layout and structure if one already exists
+- Preserve password-gated confidential case studies as a core feature
+- Confidential projects must remain protected before users can access the full case study
+- Case studies should support future content blocks for challenge, role, scope, process, impact, and visuals
+
+Leadership / Approach:
+- Add a strong section called “How I Lead Design” or “Leadership & Approach”
+- Include 4 pillars:
+  1. Product Thinking
+  2. Systems & Scalability
+  3. Team Leadership
+  4. Business Impact
+- Each pillar should be concise and visually refined
+- This section must clearly signal seniority and Creative Director-level thinking
+
+Motion / interaction:
+- Use subtle, polished motion only
+- Add smooth scroll behavior
+- Add refined hover states
+- Add tasteful fade/translate reveals
+- Include one signature interaction, such as a staggered work-card reveal or elegant hero text reveal
+- Avoid gimmicky animations or heavy parallax
+
+Images:
+- Do not use raw screenshot dumps as the design direction
+- Frame project imagery in a cinematic, product-marketing style
+- Use intentional cropping, scale, and dark editorial presentation
+
+Technical:
+- Fully responsive
+- Accessible
+- SEO-friendly
+- Fast-loading
+- Clean, maintainable code
+- Easy to update with real project content, images, metrics, and writing later
+
+The final result should feel like a personal brand website for a senior Creative Director who can lead product vision, design systems, teams, and business outcomes. It should be competitive with top-tier design leadership portfolios.
