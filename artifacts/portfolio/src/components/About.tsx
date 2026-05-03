@@ -41,13 +41,16 @@ export default function About() {
           >
             <div className="space-y-8 text-lg md:text-xl text-white/80 font-light leading-relaxed max-w-2xl mb-24">
               <p>
-                I am a Creative Director and Digital Design Director focused on shaping visual systems, campaigns, and digital experiences that communicate with precision and intent.
+                I’m a Creative Director working across brand, campaigns, and digital experiences.
               </p>
               <p>
-                My work spans brand expression, graphic design, and integrated campaigns, driving creative vision from concept to scale. I believe in establishing strong, scalable design languages that anchor brands across all touchpoints.
+                My work focuses on shaping how brands communicate — translating strategy into clear, compelling visual systems and narratives that connect across every touchpoint. From brand identity and campaign direction to digital execution, I’m interested in how ideas take form and resonate with real audiences.
               </p>
               <p>
-                Leading multidisciplinary teams, I champion a fearless creative culture where every typographic choice, composition, and interaction is deliberate and crafted.
+                I partner closely with clients and multidisciplinary teams to develop work that is both conceptually strong and visually precise — ensuring that every element, from typography to motion, serves a larger story.
+              </p>
+              <p>
+                I’m drawn to projects where design is not just expression, but communication — where clarity, intent, and craft define how a brand is experienced.
               </p>
             </div>
 
