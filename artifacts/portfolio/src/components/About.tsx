@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import portrait from "@assets/IMG_3812_1777802612391.jpeg";
 
 export default function About() {
   return (
@@ -26,12 +27,8 @@ export default function About() {
             className="lg:col-span-5 relative"
           >
             <div className="aspect-[3/4] bg-[#0A0A0A] border border-white/10 overflow-hidden relative group">
+               <img src={portrait} alt="Jay Jay He portrait" className="h-full w-full object-cover object-center" />
                <div className="absolute inset-0 bg-white/[0.02] mix-blend-overlay pointer-events-none" />
-               <div className="w-full h-full flex flex-col items-center justify-center p-12 text-center text-white/5 font-playfair font-bold text-8xl tracking-widest leading-[0.8] select-none">
-                 <span>J</span>
-                 <span>J</span>
-                 <span>H</span>
-               </div>
             </div>
           </motion.div>
 
