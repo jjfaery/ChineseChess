@@ -46,10 +46,10 @@ export default function About() {
           >
             <div className="space-y-8 text-lg md:text-xl text-white/80 font-light leading-relaxed max-w-2xl mb-24">
               <p>
-                I’m a Creative Director working across brand, campaigns, and digital experiences.
+                I’m a Creative Director working across brand, campaigns, digital, and environmental experiences.
               </p>
               <p>
-                My work focuses on shaping how ideas are communicated — translating strategy into clear, compelling visual systems and narratives that connect across every touchpoint. From identity development and campaign direction to digital execution, I’m interested in how design creates meaning and drives understanding.
+                My work focuses on shaping how ideas are communicated — translating strategy into clear, compelling visual systems and narratives that connect across every touchpoint. From identity development and campaign direction to digital and spatial execution, I’m interested in how design creates meaning and drives understanding.
               </p>
               <p>
                 I lead multidisciplinary teams from concept through delivery, ensuring that work is both conceptually strong and visually precise — aligning brand, communication, and craft into a cohesive direction.
@@ -67,7 +67,7 @@ export default function About() {
                   "Brand Systems",
                   "Campaign Direction",
                   "Digital Experience",
-                  "Motion & Interaction",
+                  "Spatial & Environmental Design",
                   "Creative Leadership"
                 ].map(skill => (
                   <span key={skill} className="text-sm font-medium text-white/70 border-b border-white/10 pb-3 mb-3">
