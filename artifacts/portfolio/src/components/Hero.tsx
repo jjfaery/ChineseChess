@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { ArrowDown } from "lucide-react";
+import { Link } from "wouter";
 
 export default function Hero() {
   const container = {
@@ -22,15 +23,8 @@ export default function Hero() {
     },
   };
 
-  const scrollToWork = () => {
-    const el = document.getElementById("work");
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth" });
-    }
-  };
-
   return (
-    <section id="hero" className="relative h-[100dvh] w-full flex items-center justify-center overflow-hidden bg-black">
+    <section className="relative h-[100dvh] w-full flex items-center justify-center overflow-hidden bg-black mt-[-64px] md:mt-[-72px]">
       <div className="absolute inset-0 z-0">
         <video
           autoPlay
@@ -42,7 +36,7 @@ export default function Hero() {
         >
           <source src={`${import.meta.env.BASE_URL}hero-bg.mp4`} type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/80 pointer-events-none" />
       </div>
 
       <div className="relative z-10 w-full max-w-[1440px] px-6 md:px-20 pt-20">
@@ -53,41 +47,38 @@ export default function Hero() {
           className="max-w-4xl"
         >
           <motion.div variants={item} className="mb-6">
-            <span className="text-[11px] md:text-[13px] font-medium tracking-[0.15em] text-accent uppercase">
-              Creative Director · Product Design Leadership
+            <span className="text-[11px] md:text-[13px] font-medium tracking-[0.2em] text-white/70 uppercase">
+              Creative Director · Digital Design · Brand
             </span>
           </motion.div>
           
           <motion.h1 
             variants={item}
-            className="text-5xl md:text-[84px] leading-[1.05] font-bold text-white mb-8 tracking-[-0.03em] max-w-3xl"
+            className="font-playfair text-5xl md:text-[84px] lg:text-[96px] leading-[1.05] font-extrabold text-white mb-8 tracking-[-0.03em] max-w-3xl"
           >
             Designing intelligence into digital experiences.
           </motion.h1>
           
           <motion.p 
             variants={item}
-            className="text-lg md:text-xl text-white/60 max-w-xl leading-relaxed font-light"
+            className="text-lg md:text-xl text-white/70 max-w-xl leading-relaxed font-light"
           >
-            Creative Director and Product Design leader shaping AI-driven platforms, design systems, and business-impactful digital products.
+            Creative Director shaping visual systems, brand expression, campaigns, and digital experiences that communicate with precision and intent.
           </motion.p>
         </motion.div>
       </div>
 
-      <motion.button
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5, duration: 1 }}
-        onClick={scrollToWork}
-        className="absolute bottom-12 left-6 md:left-20 flex items-center gap-3 text-[13px] uppercase tracking-[0.1em] text-white/50 hover:text-white transition-colors group focus:outline-none"
-        aria-label="Scroll to work"
+        className="absolute bottom-12 left-6 md:left-20 flex items-center gap-3 text-[13px] uppercase tracking-[0.1em] text-white/50"
       >
         <span className="relative overflow-hidden h-4 w-4">
-          <ArrowDown className="w-4 h-4 transform group-hover:translate-y-full transition-transform duration-300 absolute inset-0" />
-          <ArrowDown className="w-4 h-4 transform -translate-y-full group-hover:translate-y-0 transition-transform duration-300 absolute inset-0" />
+          <ArrowDown className="w-4 h-4 animate-bounce absolute inset-0" />
         </span>
-        Scroll to explore
-      </motion.button>
+        Scroll
+      </motion.div>
     </section>
   );
 }

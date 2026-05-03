@@ -1,0 +1,53 @@
+Please revise the current site direction. The current version feels like one long continuous scrolling page, and the look and feel still does not match the goal of a senior Creative Director portfolio.
+
+Rebuild the experience so it feels more structured, navigable, and premium — not like a single-page landing page.
+
+Key changes:
+
+1. Site structure:
+Create clear page sections and/or separate pages for:
+- Home
+- Work
+- About
+- Leadership
+- Contact
+
+The site should not feel like one endless scrolling page. Each area should feel intentional, distinct, and easy to understand.
+
+2. Navigation state:
+Keep the sticky black navigation bar, but add a clear active navigation indicator so users always know where they are. The active state can be a refined underline, subtle highlight, opacity change, or small marker. It should update while scrolling and when viewing each page/section.
+
+3. Improve orientation:
+Add stronger section transitions, clearer section titles, and better spacing breaks so the user can immediately understand when they’ve moved from Hero to Work to About to Leadership to Contact.
+
+4. Correct visual direction:
+The current look and feel does not match the intended aim. Push it toward a more elevated Creative Director / digital design / graphic design director portfolio:
+- More editorial
+- More art-directed
+- More visually confident
+- More brand-led
+- Less generic
+- Less tech-template
+- Less product-design-heavy
+
+5. Hero:
+Keep the video background idea, but make the hero feel more designed and memorable. It should feel cinematic, premium, and connected to visual design, creative direction, brand systems, motion, and digital storytelling — not generic AI/product footage.
+
+6. Content positioning:
+Remove product-design-lead language. Position Jay Jay He as a Creative Director / Digital Design and Graphic Design Director focused on:
+- creative direction
+- digital design
+- graphic design
+- visual systems
+- brand expression
+- campaigns
+- storytelling
+- digital experiences
+
+7. Work section:
+Make the work section feel curated and more gallery/editorial-like, not like a basic project grid. Use stronger project hierarchy and more visual impact.
+
+8. Keep case studies:
+Preserve the current case study page structure and the password gate for confidential projects.
+
+Overall, the site should feel like a top-tier Creative Director personal brand site with clear navigation, strong orientation, stronger visual taste, and a much more premium, designed look and feel.

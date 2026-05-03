@@ -4,15 +4,26 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
+import WorkPage from "@/pages/WorkPage";
+import AboutPage from "@/pages/AboutPage";
+import LeadershipPage from "@/pages/LeadershipPage";
+import ContactPage from "@/pages/ContactPage";
+import Layout from "@/components/Layout";
 
 const queryClient = new QueryClient();
 
 function Router() {
   return (
-    <Switch>
-      <Route path="/" component={Home} />
-      <Route component={NotFound} />
-    </Switch>
+    <Layout>
+      <Switch>
+        <Route path="/" component={Home} />
+        <Route path="/work" component={WorkPage} />
+        <Route path="/about" component={AboutPage} />
+        <Route path="/leadership" component={LeadershipPage} />
+        <Route path="/contact" component={ContactPage} />
+        <Route component={NotFound} />
+      </Switch>
+    </Layout>
   );
 }
 

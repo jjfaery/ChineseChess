@@ -1,65 +1,112 @@
-import { useEffect, useState } from "react";
-import { Link } from "wouter";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { useState } from "react";
+import { Link, useLocation } from "wouter";
+import { motion, AnimatePresence } from "framer-motion";
+import { Menu, X } from "lucide-react";
 
 export default function Nav() {
-  const [scrolled, setScrolled] = useState(false);
+  const [location] = useLocation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const scrollTo = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+  const links = [
+    { href: "/work", label: "Work" },
+    { href: "/about", label: "About" },
+    { href: "/leadership", label: "Leadership" },
+    { href: "/contact", label: "Contact" },
+  ];
 
   return (
-    <motion.header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b ${
-        scrolled ? "bg-black/80 backdrop-blur-md border-white/10" : "bg-transparent border-transparent"
-      }`}
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-    >
-      <div className="max-w-[1440px] mx-auto px-6 md:px-20 h-16 md:h-[72px] flex items-center justify-between">
-        <button
-          onClick={() => scrollTo("hero")}
-          className="hover:opacity-70 transition-opacity focus:outline-none"
-          aria-label="Home"
-        >
-          <img
-            src="http://images.squarespace-cdn.com/content/v1/554a9481e4b0ada23516d9fd/1453504037843-8XLB1T8BX9Q02ZW4NHOW/JayJayHe_Logo.png?format=1500w"
-            alt="Jay Jay He"
-            className="h-6 invert brightness-0 invert-100"
-          />
-        </button>
+    <>
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[#0A0A0A] border-b border-white/10 h-16 md:h-[72px]">
+        <div className="max-w-[1440px] mx-auto px-6 md:px-20 h-full flex items-center justify-between">
+          <Link
+            href="/"
+            className="hover:opacity-70 transition-opacity focus:outline-none"
+            aria-label="Home"
+          >
+            <img
+              src="http://images.squarespace-cdn.com/content/v1/554a9481e4b0ada23516d9fd/1453504037843-8XLB1T8BX9Q02ZW4NHOW/JayJayHe_Logo.png?format=1500w"
+              alt="Jay Jay He"
+              className="h-6 invert brightness-0 invert-100"
+            />
+          </Link>
 
-        <nav className="hidden md:flex items-center gap-8 text-[13px] font-medium tracking-[0.05em] uppercase text-white/70">
-          <button onClick={() => scrollTo("work")} className="hover:text-white transition-colors">
-            Work
+          <nav className="hidden md:flex items-center gap-8 text-[13px] font-medium tracking-[0.05em] uppercase">
+            {links.map((link) => {
+              const isActive = location === link.href || (location.startsWith(link.href) && link.href !== "/");
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`relative py-2 transition-colors ${isActive ? "text-white" : "text-white/50 hover:text-white"}`}
+                >
+                  {link.label}
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeNav"
+                      className="absolute bottom-0 left-0 right-0 h-[1px] bg-white"
+                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    />
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
+
+          <button
+            className="md:hidden text-white focus:outline-none"
+            onClick={() => setMobileMenuOpen(true)}
+            aria-label="Open Menu"
+          >
+            <Menu className="w-6 h-6" />
           </button>
-          <button onClick={() => scrollTo("case-studies")} className="hover:text-white transition-colors">
-            Case Studies
-          </button>
-          <button onClick={() => scrollTo("leadership")} className="hover:text-white transition-colors">
-            Leadership
-          </button>
-          <button onClick={() => scrollTo("about")} className="hover:text-white transition-colors">
-            About
-          </button>
-          <button onClick={() => scrollTo("contact")} className="hover:text-white transition-colors">
-            Contact
-          </button>
-        </nav>
-      </div>
-    </motion.header>
+        </div>
+      </header>
+
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: "-100%" }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: "-100%" }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed inset-0 z-[60] bg-[#0A0A0A] flex flex-col"
+          >
+            <div className="h-16 md:h-[72px] px-6 flex items-center justify-between border-b border-white/10">
+              <Link
+                href="/"
+                onClick={() => setMobileMenuOpen(false)}
+                className="hover:opacity-70 transition-opacity focus:outline-none"
+                aria-label="Home"
+              >
+                <img
+                  src="http://images.squarespace-cdn.com/content/v1/554a9481e4b0ada23516d9fd/1453504037843-8XLB1T8BX9Q02ZW4NHOW/JayJayHe_Logo.png?format=1500w"
+                  alt="Jay Jay He"
+                  className="h-6 invert brightness-0 invert-100"
+                />
+              </Link>
+              <button
+                className="text-white focus:outline-none"
+                onClick={() => setMobileMenuOpen(false)}
+                aria-label="Close Menu"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <nav className="flex-1 flex flex-col justify-center px-12 gap-8 text-2xl uppercase tracking-widest font-medium">
+              {links.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`transition-colors ${location === link.href ? "text-white" : "text-white/50"}`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
