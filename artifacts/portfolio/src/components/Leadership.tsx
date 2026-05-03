@@ -40,7 +40,7 @@ export default function Leadership() {
           className="mb-20"
         >
           <div className="flex justify-start items-center mb-6">
-            <span className="text-[11px] uppercase tracking-[0.2em] text-white/40">Leadership</span>
+            <span className="text-[11px] uppercase tracking-[0.2em] text-white/40">III. Leadership</span>
           </div>
           <div className="w-full h-[1px] bg-white/10 mb-12" />
           

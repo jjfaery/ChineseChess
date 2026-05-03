@@ -78,7 +78,7 @@ export default function CaseStudies() {
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             >
               <h2 className="font-playfair text-3xl md:text-5xl font-bold tracking-tight mb-4 text-left">
-                Confidential Work
+                II. Confidential Work
               </h2>
               <p className="text-white/50 max-w-xl text-lg text-left">
                 Deep dives into brand strategy, campaign direction, and unreleased visual systems.
