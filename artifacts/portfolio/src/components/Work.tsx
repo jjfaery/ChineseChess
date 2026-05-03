@@ -49,6 +49,7 @@ const projects: Project[] = [
 
 function ProjectCard({ project, index, layout }: { project: Project; index: number; layout: "large" | "split" | "grid" }) {
   const imageAspect = layout === "large" ? "aspect-[16/9]" : layout === "split" ? "aspect-[3/4]" : "aspect-[4/3]";
+  const showInlineNumber = layout !== "large";
 
   return (
     <Link href={project.href} className={`group block ${layout === "split" ? "md:flex md:items-center md:gap-20" : ""}`}>
@@ -75,7 +76,7 @@ function ProjectCard({ project, index, layout }: { project: Project; index: numb
 
       <div className={`${layout === "split" ? "w-full md:w-2/5 mt-8 md:mt-0" : "mt-5"}`}>
         <div className="flex items-baseline gap-4 mb-3">
-          {index > 0 && <span className="text-[13px] text-[var(--muted-foreground)] font-mono tracking-widest leading-none">0{index + 1}</span>}
+          {showInlineNumber && <span className="text-[13px] text-[var(--muted-foreground)] font-mono tracking-widest leading-none">0{index + 1}</span>}
           <h3 className={`${layout === "large" ? "text-3xl md:text-5xl" : layout === "split" ? "text-3xl md:text-4xl" : "text-2xl"} font-playfair font-bold leading-tight`}>
             {project.title}
           </h3>
