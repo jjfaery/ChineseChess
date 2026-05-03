@@ -37,10 +37,10 @@ export default function Leadership() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-20"
+          className="mb-8 md:mb-10"
         >
           <div className="max-w-4xl pb-12 border-b border-white/10">
-            <p className="font-playfair text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight text-white mb-8 leading-tight">
+            <p className="font-playfair text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight text-white mb-6 leading-tight">
               Directing with purpose and precision.
             </p>
             <p className="text-white/60 text-lg md:text-xl leading-relaxed font-light">
