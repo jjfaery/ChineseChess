@@ -78,7 +78,7 @@ export default function CaseStudies() {
             className="mb-20"
           >
             <div className="flex justify-start items-center mb-6">
-              <span className="text-[11px] uppercase tracking-[0.2em] text-white/40">II. Confidential Work</span>
+              <span className="text-[11px] uppercase tracking-[0.2em] text-[#9F8CFF]">II. Confidential Work</span>
             </div>
             <div className="w-full h-[1px] bg-white/10 mb-8" />
             <p className="font-playfair text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight text-white mb-8 leading-tight max-w-4xl">

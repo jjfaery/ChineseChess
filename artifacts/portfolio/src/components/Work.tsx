@@ -94,7 +94,7 @@ export default function Work() {
           className="mb-20"
         >
           <div className="flex items-center mb-6">
-            <span className="text-[11px] uppercase tracking-[0.2em] text-[var(--muted-foreground)]">I. Selected Work</span>
+            <span className="text-[11px] uppercase tracking-[0.2em] text-[#9F8CFF]">I. Selected Work</span>
           </div>
           <div className="w-full h-[1px] bg-[var(--border)] mb-8" />
           <p className="font-playfair text-4xl md:text-6xl font-bold tracking-tight text-[var(--foreground)] max-w-3xl mb-8">Narrative depth and visual precision.</p>
