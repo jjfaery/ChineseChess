@@ -19,10 +19,8 @@ export default function Footer() {
             </span>
           </div>
 
-          <div className="flex justify-end items-center gap-8 text-[11px] uppercase tracking-widest text-white/50">
+          <div className="flex justify-end items-center text-[11px] uppercase tracking-widest text-white/50">
             <a href="#" className="hover:text-white transition-colors">LinkedIn</a>
-            <a href="#" className="hover:text-white transition-colors">Instagram</a>
-            <a href="#" className="hover:text-white transition-colors">Twitter</a>
           </div>
         </div>
 
