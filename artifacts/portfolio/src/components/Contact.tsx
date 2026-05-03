@@ -12,7 +12,7 @@ export default function Contact() {
           className="mb-20"
         >
           <div className="flex justify-start items-center mb-3">
-            <span className="text-[11px] uppercase tracking-[0.2em] text-white/40">Contact</span>
+            <span className="text-[11px] uppercase tracking-[0.2em] text-white/40">V. Contact</span>
           </div>
           <div className="w-full h-[1px] bg-white/10 mb-16" />
         </motion.div>

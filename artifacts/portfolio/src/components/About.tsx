@@ -13,7 +13,7 @@ export default function About() {
           className="mb-8 md:mb-10"
         >
           <div className="flex justify-start items-center mb-3">
-            <span className="text-[11px] uppercase tracking-[0.2em] text-white/40">About me</span>
+            <span className="text-[11px] uppercase tracking-[0.2em] text-white/40">IV. About me</span>
           </div>
           <div className="w-full h-[1px] bg-white/10" />
         </motion.div>
@@ -75,8 +75,6 @@ export default function About() {
                   </span>
                 ))}
               </div>
-
-              <p className="mt-16 text-[11px] font-mono tracking-widest text-white/30 uppercase">Est. &mdash;</p>
             </div>
           </motion.div>
         </div>
