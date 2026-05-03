@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
@@ -7,6 +7,14 @@ import logo from "@assets/IMG_3801_1777799555347.webp";
 export default function Nav() {
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const links = [
     { href: "/", label: "Home" },
@@ -18,28 +26,20 @@ export default function Nav() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#0A0A0A] border-b border-white/10 h-16 md:h-[72px]">
+      <header className={`fixed top-0 left-0 right-0 z-50 h-16 md:h-[72px] transition-all duration-300 ${scrolled ? "bg-[#0A0A0A]/55 backdrop-blur-xl border-b border-white/10" : "bg-transparent border-b border-transparent"}`}>
         <div className="max-w-[1440px] mx-auto px-6 md:px-20 h-full flex items-center justify-between">
-          <Link
-            href="/"
-            className="hover:opacity-70 transition-opacity focus:outline-none"
-            aria-label="Home"
-          >
-            <img
-              src={logo}
-              alt="Jay Jay He"
-              className="h-8 md:h-9 object-contain"
-            />
+          <Link href="/" className="hover:opacity-70 transition-opacity focus:outline-none" aria-label="Home">
+            <img src={logo} alt="Jay Jay He" className="h-8 md:h-9 object-contain" />
           </Link>
 
-          <nav className="hidden md:flex items-center gap-10 text-[12px] font-medium tracking-[0.12em] uppercase">
+          <nav className="hidden md:flex items-center gap-10 text-[12px] font-medium tracking-[0.12em] uppercase text-white">
             {links.map((link) => {
               const isActive = location === link.href || (location.startsWith(link.href) && link.href !== "/");
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`relative py-2 transition-all duration-300 hover:tracking-[0.2em] ${isActive ? "text-white" : "text-white/50 hover:text-white"}`}
+                  className={`relative py-2 transition-colors duration-300 ${isActive ? "text-white" : "text-white/70 hover:text-white"}`}
                 >
                   {link.label}
                   {isActive && (
@@ -54,11 +54,7 @@ export default function Nav() {
             })}
           </nav>
 
-          <button
-            className="md:hidden text-white focus:outline-none"
-            onClick={() => setMobileMenuOpen(true)}
-            aria-label="Open Menu"
-          >
+          <button className="md:hidden text-white focus:outline-none" onClick={() => setMobileMenuOpen(true)} aria-label="Open Menu">
             <Menu className="w-6 h-6" />
           </button>
         </div>
@@ -74,23 +70,10 @@ export default function Nav() {
             className="fixed inset-0 z-[60] bg-[#0A0A0A] flex flex-col"
           >
             <div className="h-16 md:h-[72px] px-6 flex items-center justify-between border-b border-white/10">
-              <Link
-                href="/"
-                onClick={() => setMobileMenuOpen(false)}
-                className="hover:opacity-70 transition-opacity focus:outline-none"
-                aria-label="Home"
-              >
-                <img
-                  src={logo}
-                  alt="Jay Jay He"
-                  className="h-8 md:h-9 object-contain"
-                />
+              <Link href="/" onClick={() => setMobileMenuOpen(false)} className="hover:opacity-70 transition-opacity focus:outline-none" aria-label="Home">
+                <img src={logo} alt="Jay Jay He" className="h-8 md:h-9 object-contain" />
               </Link>
-              <button
-                className="text-white focus:outline-none"
-                onClick={() => setMobileMenuOpen(false)}
-                aria-label="Close Menu"
-              >
+              <button className="text-white focus:outline-none" onClick={() => setMobileMenuOpen(false)} aria-label="Close Menu">
                 <X className="w-6 h-6" />
               </button>
             </div>
