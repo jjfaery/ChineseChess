@@ -338,3 +338,80 @@ export function hasAnyLegalMove(board: Board, color: PlayerColor): boolean {
 export function otherColor(color: PlayerColor): PlayerColor {
   return color === "red" ? "black" : "red";
 }
+
+export const PIECE_VALUES: Record<PieceType, number> = {
+  general: 1000,
+  chariot: 9,
+  cannon: 4.5,
+  horse: 4,
+  elephant: 2,
+  advisor: 2,
+  soldier: 1,
+};
+
+export const PIECE_NAMES: Record<PieceType, string> = {
+  general: "General",
+  chariot: "Chariot",
+  cannon: "Cannon",
+  horse: "Horse",
+  elephant: "Elephant",
+  advisor: "Advisor",
+  soldier: "Soldier",
+};
+
+export interface MoveSuggestion {
+  from: Position;
+  to: Position;
+  reason: string;
+}
+
+/**
+ * Scores every legal move for `color` and returns the best one found, favoring
+ * captures (by captured piece value) and checks. Meant as a learning hint, not
+ * a strong engine — ties are broken with a small random jitter so it doesn't
+ * always recommend the same move from a given position.
+ */
+export function suggestMove(board: Board, color: PlayerColor): MoveSuggestion | null {
+  const enemyColor = otherColor(color);
+  let best: { from: Position; to: Position; score: number; captured: Piece | null; givesCheck: boolean } | null = null;
+
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      const piece = board[row][col];
+      if (!piece || piece.color !== color) continue;
+      const from = { row, col };
+      const legal = getLegalMoves(board, from);
+
+      for (const to of legal) {
+        const captured = board[to.row][to.col];
+        const next = cloneBoard(board);
+        next[to.row][to.col] = piece;
+        next[from.row][from.col] = null;
+        const givesCheck = isInCheck(next, enemyColor);
+
+        let score = 0;
+        if (captured) score += PIECE_VALUES[captured.type] * 10;
+        if (givesCheck) score += 6;
+        score += Math.random() * 0.5;
+
+        if (!best || score > best.score) {
+          best = { from, to, score, captured, givesCheck };
+        }
+      }
+    }
+  }
+
+  if (!best) return null;
+
+  const pieceLabel = PIECE_NAMES[board[best.from.row][best.from.col]!.type];
+  let reason: string;
+  if (best.captured) {
+    reason = `Move your ${pieceLabel} to capture the enemy ${PIECE_NAMES[best.captured.type]}.`;
+  } else if (best.givesCheck) {
+    reason = `Move your ${pieceLabel} to put the enemy General in check.`;
+  } else {
+    reason = `Try advancing your ${pieceLabel} to open up more options.`;
+  }
+
+  return { from: best.from, to: best.to, reason };
+}

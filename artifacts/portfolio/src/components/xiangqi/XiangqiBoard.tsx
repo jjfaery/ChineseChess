@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Board,
   COLS,
@@ -12,7 +12,29 @@ import {
   hasAnyLegalMove,
   isInCheck,
   otherColor,
+  suggestMove,
+  MoveSuggestion,
 } from "@/lib/xiangqi-engine";
+
+type GameMode = "two-player" | "vs-computer";
+
+const PIECE_TIPS: { type: PieceType; label: string; tip: string }[] = [
+  { type: "general", label: "General (帥 / 將)", tip: "Moves one point orthogonally, and must stay inside its 3×3 palace. Two Generals can never face each other on an open file with nothing between them." },
+  { type: "advisor", label: "Advisor (仕 / 士)", tip: "Moves one point diagonally, and never leaves the palace." },
+  { type: "elephant", label: "Elephant (相 / 象)", tip: "Moves exactly two points diagonally, can't cross the river, and is blocked if the midpoint is occupied." },
+  { type: "horse", label: "Horse (傌 / 馬)", tip: "Moves like a knight, but is blocked if the adjacent orthogonal point in its direction of travel is occupied ('hobbling the horse's leg')." },
+  { type: "chariot", label: "Chariot (俥 / 車)", tip: "Slides any distance along rows or columns, like a rook. Usually the strongest piece on the board." },
+  { type: "cannon", label: "Cannon (炮 / 砲)", tip: "Slides like a chariot when not capturing, but to capture it must jump over exactly one piece (of either color) first." },
+  { type: "soldier", label: "Soldier (兵 / 卒)", tip: "Moves one point forward only — until it crosses the river, after which it can also move one point sideways. Never moves backward." },
+];
+
+const STRATEGY_TIPS = [
+  "Develop your Horses and Cannons early — Chariots are already strong on open files.",
+  "Cannons are most powerful before the board empties out; they need a piece to jump over.",
+  "Keep your Advisors and Elephants near the palace — they defend the General and can't cross the river anyway.",
+  "Watch out for the 'flying General' rule: never leave your General facing the enemy General on a clear file.",
+  "A player with no legal moves loses immediately in Xiangqi — even if their General isn't in check.",
+];
 
 const CELL = 56;
 const MARGIN = 32;
@@ -59,12 +81,19 @@ interface GameStatus {
 }
 
 export default function XiangqiBoard() {
+  const [mode, setMode] = useState<GameMode>("two-player");
+  const [humanColor, setHumanColor] = useState<PlayerColor>("red");
   const [board, setBoard] = useState<Board>(() => createInitialBoard());
   const [turn, setTurn] = useState<PlayerColor>("red");
   const [selected, setSelected] = useState<Position | null>(null);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [lastMove, setLastMove] = useState<{ from: Position; to: Position } | null>(null);
   const [status, setStatus] = useState<GameStatus>({ over: false });
+  const [hint, setHint] = useState<MoveSuggestion | null>(null);
+  const [showHelp, setShowHelp] = useState(false);
+  const [thinking, setThinking] = useState(false);
+
+  const computerColor = mode === "vs-computer" ? otherColor(humanColor) : null;
 
   const legalMoves = useMemo(() => {
     if (!selected) return [];
@@ -80,43 +109,66 @@ export default function XiangqiBoard() {
     setHistory([]);
     setLastMove(null);
     setStatus({ over: false });
+    setHint(null);
+    setThinking(false);
+  }
+
+  function changeMode(nextMode: GameMode) {
+    setMode(nextMode);
+    resetGame();
+  }
+
+  function changeHumanColor(color: PlayerColor) {
+    setHumanColor(color);
+    resetGame();
   }
 
   function undoMove() {
-    if (history.length === 0 || status.over) return;
-    const prev = history[history.length - 1];
+    if (history.length === 0 || status.over || thinking) return;
+    // In vs-computer mode, step back past the computer's reply too so it's the human's turn again.
+    const stepsBack = mode === "vs-computer" && history.length >= 2 ? 2 : 1;
+    const prev = history[history.length - stepsBack];
     setBoard(prev.board);
     setTurn(prev.turn);
-    setHistory((h) => h.slice(0, -1));
+    setHistory((h) => h.slice(0, -stepsBack));
     setSelected(null);
     setLastMove(null);
     setStatus({ over: false });
+    setHint(null);
+  }
+
+  function applyMove(from: Position, to: Position) {
+    const movingPiece = board[from.row][from.col];
+    if (!movingPiece) return;
+    const next = cloneBoard(board);
+    next[to.row][to.col] = movingPiece;
+    next[from.row][from.col] = null;
+
+    setHistory((h) => [...h, { board, turn }]);
+    setBoard(next);
+    setLastMove({ from, to });
+    setSelected(null);
+    setHint(null);
+
+    const nextTurn = otherColor(turn);
+    setTurn(nextTurn);
+
+    if (!hasAnyLegalMove(next, nextTurn)) {
+      const reason = isInCheck(next, nextTurn) ? "checkmate" : "stalemate";
+      setStatus({ over: true, winner: turn, reason });
+    }
   }
 
   function handleSquareClick(pos: Position) {
-    if (status.over) return;
+    if (status.over || thinking) return;
+    if (computerColor && turn === computerColor) return;
+
     const piece = board[pos.row][pos.col];
 
     if (selected) {
       const isLegal = legalMoves.some((m) => m.row === pos.row && m.col === pos.col);
       if (isLegal) {
-        const movingPiece = board[selected.row][selected.col];
-        const next = cloneBoard(board);
-        next[pos.row][pos.col] = movingPiece;
-        next[selected.row][selected.col] = null;
-
-        setHistory((h) => [...h, { board, turn }]);
-        setBoard(next);
-        setLastMove({ from: selected, to: pos });
-        setSelected(null);
-
-        const nextTurn = otherColor(turn);
-        setTurn(nextTurn);
-
-        if (!hasAnyLegalMove(next, nextTurn)) {
-          const reason = isInCheck(next, nextTurn) ? "checkmate" : "stalemate";
-          setStatus({ over: true, winner: turn, reason });
-        }
+        applyMove(selected, pos);
         return;
       }
 
@@ -134,10 +186,109 @@ export default function XiangqiBoard() {
     }
   }
 
+  function requestHint() {
+    if (status.over || thinking) return;
+    if (computerColor && turn === computerColor) return;
+    const suggestion = suggestMove(board, turn);
+    setHint(suggestion);
+  }
+
+  // Computer's turn: pick a move via the same heuristic used for hints, after a short "thinking" delay.
+  useEffect(() => {
+    if (!computerColor || turn !== computerColor || status.over) return;
+    setThinking(true);
+    const timeout = setTimeout(() => {
+      const move = suggestMove(board, computerColor);
+      if (move) applyMove(move.from, move.to);
+      setThinking(false);
+    }, 500);
+    return () => clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [board, turn, computerColor, status.over]);
+
   const selectedPiece = selected ? board[selected.row][selected.col] : null;
 
   return (
     <div className="flex flex-col items-center gap-6">
+      <div className="flex flex-wrap items-center justify-center gap-2">
+        <div className="flex rounded-full border border-white/15 p-1 text-xs uppercase tracking-wide">
+          <button
+            onClick={() => changeMode("two-player")}
+            className={`px-4 py-1.5 rounded-full transition-colors ${
+              mode === "two-player" ? "bg-white text-black" : "text-white/60 hover:text-white"
+            }`}
+          >
+            Two Players
+          </button>
+          <button
+            onClick={() => changeMode("vs-computer")}
+            className={`px-4 py-1.5 rounded-full transition-colors ${
+              mode === "vs-computer" ? "bg-white text-black" : "text-white/60 hover:text-white"
+            }`}
+          >
+            Vs Computer
+          </button>
+        </div>
+
+        {mode === "vs-computer" && (
+          <div className="flex rounded-full border border-white/15 p-1 text-xs uppercase tracking-wide">
+            <button
+              onClick={() => changeHumanColor("red")}
+              className={`px-4 py-1.5 rounded-full transition-colors ${
+                humanColor === "red" ? "bg-red-600 text-white" : "text-white/60 hover:text-white"
+              }`}
+            >
+              Play Red
+            </button>
+            <button
+              onClick={() => changeHumanColor("black")}
+              className={`px-4 py-1.5 rounded-full transition-colors ${
+                humanColor === "black" ? "bg-white text-black" : "text-white/60 hover:text-white"
+              }`}
+            >
+              Play Black
+            </button>
+          </div>
+        )}
+
+        <button
+          onClick={() => setShowHelp((v) => !v)}
+          className="px-4 py-1.5 rounded-full border border-white/15 text-xs uppercase tracking-wide text-white/60 hover:text-white hover:border-white/40 transition-colors"
+        >
+          {showHelp ? "Hide Rules" : "How to Play"}
+        </button>
+      </div>
+
+      {showHelp && (
+        <div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-white/5 p-6 text-left text-sm text-white/70 space-y-5">
+          <div>
+            <h3 className="text-white font-semibold mb-1">Objective</h3>
+            <p>
+              Checkmate the enemy General, or leave your opponent with no legal move at all —
+              both end the game immediately. Red always moves first.
+            </p>
+          </div>
+          <div>
+            <h3 className="text-white font-semibold mb-2">How each piece moves</h3>
+            <ul className="space-y-2">
+              {PIECE_TIPS.map((p) => (
+                <li key={p.type}>
+                  <span className="text-white font-medium">{p.label}:</span> {p.tip}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h3 className="text-white font-semibold mb-2">Tips for learning</h3>
+            <ul className="list-disc list-inside space-y-1">
+              {STRATEGY_TIPS.map((tip) => (
+                <li key={tip}>{tip}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
         <div
           className={`rounded-full px-4 py-1.5 font-medium tracking-wide uppercase text-xs border ${
@@ -146,9 +297,13 @@ export default function XiangqiBoard() {
               : "bg-white/10 border-white/30 text-white/80"
           }`}
         >
-          {status.over ? "Game Over" : `${turn === "red" ? "Red" : "Black"} to move`}
+          {status.over
+            ? "Game Over"
+            : thinking
+              ? "Computer is thinking…"
+              : `${turn === "red" ? "Red" : "Black"} to move`}
         </div>
-        {!status.over && inCheck && (
+        {!status.over && !thinking && inCheck && (
           <div className="rounded-full px-4 py-1.5 font-medium tracking-wide uppercase text-xs bg-amber-500/20 border border-amber-400/60 text-amber-300 animate-pulse">
             Check!
           </div>
@@ -242,6 +397,14 @@ export default function XiangqiBoard() {
             </>
           )}
 
+          {/* hint highlight */}
+          {hint && (
+            <>
+              <circle cx={x(hint.from.col)} cy={y(hint.from.row)} r={CELL / 2 - 3} fill="none" stroke="#f59e0b" strokeWidth={3} strokeDasharray="5 4" />
+              <circle cx={x(hint.to.col)} cy={y(hint.to.row)} r={CELL / 2 - 3} fill="none" stroke="#f59e0b" strokeWidth={3} />
+            </>
+          )}
+
           {/* legal move markers */}
           {legalMoves.map((m) => {
             const occupied = board[m.row][m.col];
@@ -318,8 +481,15 @@ export default function XiangqiBoard() {
 
       <div className="flex items-center gap-3">
         <button
+          onClick={requestHint}
+          disabled={status.over || thinking || (computerColor !== null && turn === computerColor)}
+          className="px-4 py-2 rounded-full border border-amber-400/40 text-amber-300 text-xs uppercase tracking-wide hover:text-amber-200 hover:border-amber-400/70 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          Hint
+        </button>
+        <button
           onClick={undoMove}
-          disabled={history.length === 0}
+          disabled={history.length === 0 || thinking || status.over}
           className="px-4 py-2 rounded-full border border-white/20 text-white/80 text-xs uppercase tracking-wide hover:text-white hover:border-white/40 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
         >
           Undo
@@ -332,7 +502,11 @@ export default function XiangqiBoard() {
         </button>
       </div>
 
-      {selectedPiece && !status.over && (
+      {hint && !status.over && (
+        <p className="text-xs text-amber-300/80 max-w-md text-center">Hint: {hint.reason}</p>
+      )}
+
+      {selectedPiece && !status.over && !hint && (
         <p className="text-xs text-white/40">
           Selected: {selectedPiece.color} {selectedPiece.type} — tap a highlighted square to move.
         </p>
