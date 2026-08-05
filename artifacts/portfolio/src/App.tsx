@@ -12,6 +12,7 @@ import CaseStudyProjectA from "@/pages/CaseStudyProjectA";
 import CaseStudyProjectB from "@/pages/CaseStudyProjectB";
 import CaseStudyProjectC from "@/pages/CaseStudyProjectC";
 import CaseStudyProjectD from "@/pages/CaseStudyProjectD";
+import ChineseChessPage from "@/pages/ChineseChessPage";
 import Layout from "@/components/Layout";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ function Router() {
         <Route path="/case-study/project-b" component={CaseStudyProjectB} />
         <Route path="/case-study/project-c" component={CaseStudyProjectC} />
         <Route path="/case-study/project-d" component={CaseStudyProjectD} />
+        <Route path="/games/chinese-chess" component={ChineseChessPage} />
         <Route component={NotFound} />
       </Switch>
     </Layout>
