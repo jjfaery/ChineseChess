@@ -6,8 +6,9 @@ export default function ChineseChessPage() {
       <div className="max-w-[1000px] mx-auto flex flex-col items-center gap-3 text-center">
         <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">Chinese Chess</h1>
         <p className="text-white/50 max-w-lg text-sm md:text-base">
-          Xiangqi (象棋) — pass-and-play locally. Red moves first. Capture the enemy
-          general, or trap them with no legal moves, to win.
+          Xiangqi (象棋) — pass-and-play locally, against the computer, or online with a
+          friend on another computer. Red moves first. Capture the enemy general, or
+          trap them with no legal moves, to win.
         </p>
       </div>
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Board,
   COLS,
@@ -15,8 +15,10 @@ import {
   suggestMove,
   MoveSuggestion,
 } from "@/lib/xiangqi-engine";
+import { connectToRoom, createRoomId, RoomConnection } from "@/lib/xiangqi-online";
 
-type GameMode = "two-player" | "vs-computer";
+type GameMode = "two-player" | "vs-computer" | "online";
+type OnlineStatus = "connecting" | "waiting" | "connected" | "opponent-left" | "error";
 
 const PIECE_TIPS: { type: PieceType; label: string; tip: string }[] = [
   { type: "general", label: "General (帥 / 將)", tip: "Moves one point orthogonally, and must stay inside its 3×3 palace. Two Generals can never face each other on an open file with nothing between them." },
@@ -93,6 +95,14 @@ export default function XiangqiBoard() {
   const [showHelp, setShowHelp] = useState(false);
   const [thinking, setThinking] = useState(false);
 
+  const [onlineRoomId, setOnlineRoomId] = useState<string | null>(null);
+  const [onlineColor, setOnlineColor] = useState<PlayerColor | null>(null);
+  const [onlineStatus, setOnlineStatus] = useState<OnlineStatus>("connecting");
+  const [onlineError, setOnlineError] = useState<string | null>(null);
+  const [linkCopied, setLinkCopied] = useState(false);
+  const connectionRef = useRef<RoomConnection | null>(null);
+  const applyingRemoteMoveRef = useRef(false);
+
   const computerColor = mode === "vs-computer" ? otherColor(humanColor) : null;
 
   const legalMoves = useMemo(() => {
@@ -157,11 +167,16 @@ export default function XiangqiBoard() {
       const reason = isInCheck(next, nextTurn) ? "checkmate" : "stalemate";
       setStatus({ over: true, winner: turn, reason });
     }
+
+    if (mode === "online" && !applyingRemoteMoveRef.current) {
+      connectionRef.current?.send({ type: "move", from, to });
+    }
   }
 
   function handleSquareClick(pos: Position) {
     if (status.over || thinking) return;
     if (computerColor && turn === computerColor) return;
+    if (mode === "online" && (onlineStatus !== "connected" || turn !== onlineColor)) return;
 
     const piece = board[pos.row][pos.col];
 
@@ -206,6 +221,99 @@ export default function XiangqiBoard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [board, turn, computerColor, status.over]);
 
+  // Keep stable refs to the latest applyMove/resetGame so the WebSocket message
+  // handler below (which is only re-created when the room changes) never calls
+  // into a stale closure over `board`/`turn`.
+  const applyMoveRef = useRef(applyMove);
+  applyMoveRef.current = applyMove;
+  const resetGameRef = useRef(resetGame);
+  resetGameRef.current = resetGame;
+
+  // Auto-join a room shared via link, e.g. /games/chinese-chess?room=<id>.
+  useEffect(() => {
+    const roomFromUrl = new URLSearchParams(window.location.search).get("room");
+    if (roomFromUrl) {
+      setMode("online");
+      setOnlineRoomId(roomFromUrl);
+    }
+    // Only ever check the URL once, on first mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Connect to (or leave) the relay whenever we enter/leave online mode with an active room.
+  useEffect(() => {
+    if (mode !== "online" || !onlineRoomId) {
+      connectionRef.current?.close();
+      connectionRef.current = null;
+      return;
+    }
+
+    setOnlineStatus("connecting");
+    setOnlineColor(null);
+    setOnlineError(null);
+    resetGameRef.current();
+
+    const connection = connectToRoom(onlineRoomId, {
+      onClose: () => {
+        setOnlineStatus((prev) => (prev === "error" ? prev : "opponent-left"));
+      },
+      onError: () => setOnlineStatus("error"),
+      onMessage: (message) => {
+        switch (message.type) {
+          case "assigned":
+            setOnlineColor(message.color);
+            setOnlineStatus("waiting");
+            break;
+          case "opponent-status":
+            setOnlineStatus(message.connected ? "connected" : "waiting");
+            break;
+          case "move":
+            applyingRemoteMoveRef.current = true;
+            applyMoveRef.current(message.from, message.to);
+            applyingRemoteMoveRef.current = false;
+            break;
+          case "reset":
+            resetGameRef.current();
+            break;
+          case "error":
+            setOnlineStatus("error");
+            setOnlineError(
+              message.reason === "room-full"
+                ? "This game link already has two players."
+                : "Something went wrong connecting to the game.",
+            );
+            break;
+        }
+      },
+    });
+
+    connectionRef.current = connection;
+
+    return () => {
+      connection.close();
+      connectionRef.current = null;
+    };
+  }, [mode, onlineRoomId]);
+
+  function createOnlineGame() {
+    const roomId = createRoomId();
+    const url = new URL(window.location.href);
+    url.searchParams.set("room", roomId);
+    window.history.replaceState(null, "", url);
+    setOnlineRoomId(roomId);
+  }
+
+  function rematch() {
+    resetGame();
+    connectionRef.current?.send({ type: "reset" });
+  }
+
+  async function copyRoomLink() {
+    await navigator.clipboard.writeText(window.location.href);
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
+  }
+
   const selectedPiece = selected ? board[selected.row][selected.col] : null;
 
   return (
@@ -227,6 +335,14 @@ export default function XiangqiBoard() {
             }`}
           >
             Vs Computer
+          </button>
+          <button
+            onClick={() => changeMode("online")}
+            className={`px-4 py-1.5 rounded-full transition-colors ${
+              mode === "online" ? "bg-white text-black" : "text-white/60 hover:text-white"
+            }`}
+          >
+            Play Online
           </button>
         </div>
 
@@ -258,6 +374,51 @@ export default function XiangqiBoard() {
           {showHelp ? "Hide Rules" : "How to Play"}
         </button>
       </div>
+
+      {mode === "online" && (
+        <div className="w-full max-w-md rounded-2xl border border-white/10 bg-white/5 p-5 text-center text-sm text-white/70 space-y-3">
+          {!onlineRoomId && (
+            <>
+              <p>Create a game and send the link to a friend to play remotely.</p>
+              <button
+                onClick={createOnlineGame}
+                className="px-4 py-2 rounded-full bg-white text-black text-xs uppercase tracking-wide hover:bg-white/90 transition-colors"
+              >
+                Create Game
+              </button>
+            </>
+          )}
+
+          {onlineRoomId && (
+            <>
+              <div className="flex items-center justify-center gap-2">
+                <input
+                  readOnly
+                  value={window.location.href}
+                  className="flex-1 min-w-0 bg-black/30 border border-white/15 rounded-full px-3 py-1.5 text-xs text-white/70 truncate"
+                  onFocus={(e) => e.currentTarget.select()}
+                />
+                <button
+                  onClick={copyRoomLink}
+                  className="px-3 py-1.5 rounded-full border border-white/20 text-xs uppercase tracking-wide text-white/80 hover:text-white hover:border-white/40 transition-colors whitespace-nowrap"
+                >
+                  {linkCopied ? "Copied!" : "Copy Link"}
+                </button>
+              </div>
+
+              {onlineStatus === "connecting" && <p>Connecting…</p>}
+              {onlineStatus === "waiting" && <p>Waiting for your opponent to open the link…</p>}
+              {onlineStatus === "connected" && onlineColor && (
+                <p>
+                  Connected — you are playing <span className="font-semibold text-white">{onlineColor}</span>.
+                </p>
+              )}
+              {onlineStatus === "opponent-left" && <p className="text-amber-300">Your opponent disconnected.</p>}
+              {onlineStatus === "error" && <p className="text-red-400">{onlineError}</p>}
+            </>
+          )}
+        </div>
+      )}
 
       {showHelp && (
         <div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-white/5 p-6 text-left text-sm text-white/70 space-y-5">
@@ -479,28 +640,32 @@ export default function XiangqiBoard() {
         </svg>
       </div>
 
-      <div className="flex items-center gap-3">
-        <button
-          onClick={requestHint}
-          disabled={status.over || thinking || (computerColor !== null && turn === computerColor)}
-          className="px-4 py-2 rounded-full border border-amber-400/40 text-amber-300 text-xs uppercase tracking-wide hover:text-amber-200 hover:border-amber-400/70 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-        >
-          Hint
-        </button>
-        <button
-          onClick={undoMove}
-          disabled={history.length === 0 || thinking || status.over}
-          className="px-4 py-2 rounded-full border border-white/20 text-white/80 text-xs uppercase tracking-wide hover:text-white hover:border-white/40 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-        >
-          Undo
-        </button>
-        <button
-          onClick={resetGame}
-          className="px-4 py-2 rounded-full border border-white/20 text-white/80 text-xs uppercase tracking-wide hover:text-white hover:border-white/40 transition-colors"
-        >
-          New Game
-        </button>
-      </div>
+      {(mode !== "online" || onlineRoomId) && (
+        <div className="flex items-center gap-3">
+          <button
+            onClick={requestHint}
+            disabled={status.over || thinking || (computerColor !== null && turn === computerColor)}
+            className="px-4 py-2 rounded-full border border-amber-400/40 text-amber-300 text-xs uppercase tracking-wide hover:text-amber-200 hover:border-amber-400/70 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            Hint
+          </button>
+          {mode !== "online" && (
+            <button
+              onClick={undoMove}
+              disabled={history.length === 0 || thinking || status.over}
+              className="px-4 py-2 rounded-full border border-white/20 text-white/80 text-xs uppercase tracking-wide hover:text-white hover:border-white/40 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              Undo
+            </button>
+          )}
+          <button
+            onClick={mode === "online" ? rematch : resetGame}
+            className="px-4 py-2 rounded-full border border-white/20 text-white/80 text-xs uppercase tracking-wide hover:text-white hover:border-white/40 transition-colors"
+          >
+            {mode === "online" ? "Rematch" : "New Game"}
+          </button>
+        </div>
+      )}
 
       {hint && !status.over && (
         <p className="text-xs text-amber-300/80 max-w-md text-center">Hint: {hint.reason}</p>
