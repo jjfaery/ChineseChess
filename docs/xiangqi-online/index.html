@@ -1,0 +1,867 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Chinese Chess — Play Online</title>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #0A0A0A;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding: 48px 20px 80px;
+  }
+  .wrap { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 24px; }
+  h1 { font-size: 2rem; font-weight: 600; letter-spacing: -0.02em; margin: 0; text-align: center; }
+  .subtitle { color: rgba(255,255,255,0.5); max-width: 32rem; text-align: center; font-size: 0.9rem; margin: 0; }
+  .row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; }
+  .tabgroup { display: flex; border-radius: 999px; border: 1px solid rgba(255,255,255,0.15); padding: 4px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .tabgroup button { border: none; background: transparent; color: rgba(255,255,255,0.6); padding: 6px 16px; border-radius: 999px; cursor: pointer; font: inherit; transition: color 0.15s, background 0.15s; }
+  .tabgroup button:hover { color: #fff; }
+  .tabgroup button.active { background: #fff; color: #000; }
+  .tabgroup button.active.red { background: #dc2626; color: #fff; }
+  .pill-btn { padding: 6px 16px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.15); background: transparent; color: rgba(255,255,255,0.6); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: color 0.15s, border-color 0.15s; }
+  .pill-btn:hover { color: #fff; border-color: rgba(255,255,255,0.4); }
+  .pill-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .pill-btn.primary { background: #fff; color: #000; border-color: #fff; }
+  .pill-btn.primary:hover { background: rgba(255,255,255,0.9); }
+  .panel { width: 100%; max-width: 640px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); padding: 20px; font-size: 0.875rem; color: rgba(255,255,255,0.7); }
+  .panel.center { max-width: 420px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .panel h3 { color: #fff; font-weight: 600; margin: 0 0 4px; }
+  .panel ul { margin: 0; padding-left: 1.1em; }
+  .panel li { margin-bottom: 4px; }
+  .link-row { display: flex; align-items: center; gap: 8px; width: 100%; }
+  .link-row input { flex: 1; min-width: 0; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); border-radius: 999px; padding: 6px 12px; font-size: 0.75rem; color: rgba(255,255,255,0.7); }
+  .status-pill { border-radius: 999px; padding: 6px 16px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; font-size: 0.7rem; border: 1px solid; }
+  .status-pill.turn-red { background: rgba(220,38,38,0.2); border-color: rgba(239,68,68,0.6); color: #fca5a5; }
+  .status-pill.turn-black { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); color: rgba(255,255,255,0.8); }
+  .status-pill.check { background: rgba(245,158,11,0.2); border-color: rgba(251,191,36,0.6); color: #fcd34d; }
+  .status-pill.over { background: rgba(16,185,129,0.2); border-color: rgba(52,211,153,0.6); color: #6ee7b7; }
+  .board-frame { border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); background: linear-gradient(to bottom, #e9d8b0, #dcc492); padding: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6); }
+  .board-frame svg { max-width: 100%; height: auto; display: block; }
+  .sq { cursor: pointer; }
+  .amber { color: #fcd34d; }
+  .hint-reason { font-size: 0.75rem; color: rgba(252,211,77,0.8); max-width: 28rem; text-align: center; }
+  .selected-caption { font-size: 0.75rem; color: rgba(255,255,255,0.4); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Chinese Chess</h1>
+    <p class="subtitle">Xiangqi (象棋) — pass-and-play locally, against the computer, or online with a friend on another computer. Red moves first. Capture the enemy general, or trap them with no legal moves, to win.</p>
+    <div id="app"></div>
+  </div>
+<script>
+"use strict";
+
+// ---------------------------------------------------------------------------
+// Engine (ported from the portfolio's xiangqi-engine.ts)
+// ---------------------------------------------------------------------------
+
+const ROWS = 10;
+const COLS = 9;
+
+const BACK_RANK = ["chariot", "horse", "elephant", "advisor", "general", "advisor", "elephant", "horse", "chariot"];
+
+function createInitialBoard() {
+  const board = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
+  BACK_RANK.forEach((type, col) => {
+    board[0][col] = { type, color: "black" };
+    board[9][col] = { type, color: "red" };
+  });
+  [1, 7].forEach((col) => {
+    board[2][col] = { type: "cannon", color: "black" };
+    board[7][col] = { type: "cannon", color: "red" };
+  });
+  [0, 2, 4, 6, 8].forEach((col) => {
+    board[3][col] = { type: "soldier", color: "black" };
+    board[6][col] = { type: "soldier", color: "red" };
+  });
+  return board;
+}
+
+function cloneBoard(board) {
+  return board.map((row) => row.slice());
+}
+
+function inBounds(row, col) {
+  return row >= 0 && row < ROWS && col >= 0 && col < COLS;
+}
+
+function inPalace(row, col, color) {
+  const rows = color === "black" ? [0, 1, 2] : [7, 8, 9];
+  return rows.includes(row) && col >= 3 && col <= 5;
+}
+
+function isOwnHalf(row, color) {
+  return color === "black" ? row <= 4 : row >= 5;
+}
+
+function samePos(a, b) {
+  return a.row === b.row && a.col === b.col;
+}
+
+function pushIfValid(board, color, row, col, moves) {
+  if (!inBounds(row, col)) return;
+  const target = board[row][col];
+  if (!target || target.color !== color) moves.push({ row, col });
+}
+
+function generalMoves(board, pos, color) {
+  const moves = [];
+  for (const [dr, dc] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+    const row = pos.row + dr, col = pos.col + dc;
+    if (!inPalace(row, col, color)) continue;
+    pushIfValid(board, color, row, col, moves);
+  }
+  return moves;
+}
+
+function advisorMoves(board, pos, color) {
+  const moves = [];
+  for (const [dr, dc] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+    const row = pos.row + dr, col = pos.col + dc;
+    if (!inPalace(row, col, color)) continue;
+    pushIfValid(board, color, row, col, moves);
+  }
+  return moves;
+}
+
+function elephantMoves(board, pos, color) {
+  const moves = [];
+  for (const [dr, dc] of [[2, 2], [2, -2], [-2, 2], [-2, -2]]) {
+    const row = pos.row + dr, col = pos.col + dc;
+    if (!inBounds(row, col) || !isOwnHalf(row, color)) continue;
+    const eyeRow = pos.row + dr / 2, eyeCol = pos.col + dc / 2;
+    if (board[eyeRow][eyeCol]) continue;
+    pushIfValid(board, color, row, col, moves);
+  }
+  return moves;
+}
+
+const HORSE_OFFSETS = [
+  { dr: -2, dc: -1, leg: { dr: -1, dc: 0 } },
+  { dr: -2, dc: 1, leg: { dr: -1, dc: 0 } },
+  { dr: 2, dc: -1, leg: { dr: 1, dc: 0 } },
+  { dr: 2, dc: 1, leg: { dr: 1, dc: 0 } },
+  { dr: -1, dc: -2, leg: { dr: 0, dc: -1 } },
+  { dr: 1, dc: -2, leg: { dr: 0, dc: -1 } },
+  { dr: -1, dc: 2, leg: { dr: 0, dc: 1 } },
+  { dr: 1, dc: 2, leg: { dr: 0, dc: 1 } },
+];
+
+function horseMoves(board, pos, color) {
+  const moves = [];
+  for (const { dr, dc, leg } of HORSE_OFFSETS) {
+    const row = pos.row + dr, col = pos.col + dc;
+    if (!inBounds(row, col)) continue;
+    const legRow = pos.row + leg.dr, legCol = pos.col + leg.dc;
+    if (board[legRow][legCol]) continue;
+    pushIfValid(board, color, row, col, moves);
+  }
+  return moves;
+}
+
+const ORTHOGONAL_DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+
+function chariotMoves(board, pos, color) {
+  const moves = [];
+  for (const [dr, dc] of ORTHOGONAL_DIRS) {
+    let row = pos.row + dr, col = pos.col + dc;
+    while (inBounds(row, col)) {
+      const target = board[row][col];
+      if (!target) {
+        moves.push({ row, col });
+      } else {
+        if (target.color !== color) moves.push({ row, col });
+        break;
+      }
+      row += dr; col += dc;
+    }
+  }
+  return moves;
+}
+
+function cannonMoves(board, pos, color) {
+  const moves = [];
+  for (const [dr, dc] of ORTHOGONAL_DIRS) {
+    let row = pos.row + dr, col = pos.col + dc;
+    let screenFound = false;
+    while (inBounds(row, col)) {
+      const target = board[row][col];
+      if (!screenFound) {
+        if (!target) moves.push({ row, col });
+        else screenFound = true;
+      } else if (target) {
+        if (target.color !== color) moves.push({ row, col });
+        break;
+      }
+      row += dr; col += dc;
+    }
+  }
+  return moves;
+}
+
+function soldierMoves(board, pos, color) {
+  const moves = [];
+  const forwardDr = color === "black" ? 1 : -1;
+  const crossedRiver = color === "black" ? pos.row >= 5 : pos.row <= 4;
+  const candidates = [[forwardDr, 0]];
+  if (crossedRiver) candidates.push([0, -1], [0, 1]);
+  for (const [dr, dc] of candidates) {
+    pushIfValid(board, color, pos.row + dr, pos.col + dc, moves);
+  }
+  return moves;
+}
+
+function getPseudoMoves(board, pos) {
+  const piece = board[pos.row][pos.col];
+  if (!piece) return [];
+  switch (piece.type) {
+    case "general": return generalMoves(board, pos, piece.color);
+    case "advisor": return advisorMoves(board, pos, piece.color);
+    case "elephant": return elephantMoves(board, pos, piece.color);
+    case "horse": return horseMoves(board, pos, piece.color);
+    case "chariot": return chariotMoves(board, pos, piece.color);
+    case "cannon": return cannonMoves(board, pos, piece.color);
+    case "soldier": return soldierMoves(board, pos, piece.color);
+    default: return [];
+  }
+}
+
+function findGeneral(board, color) {
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      const piece = board[row][col];
+      if (piece && piece.type === "general" && piece.color === color) return { row, col };
+    }
+  }
+  return null;
+}
+
+function isSquareAttacked(board, target, byColor) {
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      const piece = board[row][col];
+      if (!piece || piece.color !== byColor) continue;
+      const moves = getPseudoMoves(board, { row, col });
+      if (moves.some((m) => samePos(m, target))) return true;
+    }
+  }
+  return false;
+}
+
+function isInCheck(board, color) {
+  const generalPos = findGeneral(board, color);
+  if (!generalPos) return false;
+  const enemyColor = color === "red" ? "black" : "red";
+  if (isSquareAttacked(board, generalPos, enemyColor)) return true;
+
+  const enemyGeneralPos = findGeneral(board, enemyColor);
+  if (enemyGeneralPos && enemyGeneralPos.col === generalPos.col) {
+    const minRow = Math.min(generalPos.row, enemyGeneralPos.row);
+    const maxRow = Math.max(generalPos.row, enemyGeneralPos.row);
+    let clear = true;
+    for (let row = minRow + 1; row < maxRow; row++) {
+      if (board[row][generalPos.col]) { clear = false; break; }
+    }
+    if (clear) return true;
+  }
+  return false;
+}
+
+function getLegalMoves(board, pos) {
+  const piece = board[pos.row][pos.col];
+  if (!piece) return [];
+  const pseudo = getPseudoMoves(board, pos);
+  return pseudo.filter((dest) => {
+    const next = cloneBoard(board);
+    next[dest.row][dest.col] = piece;
+    next[pos.row][pos.col] = null;
+    return !isInCheck(next, piece.color);
+  });
+}
+
+function hasAnyLegalMove(board, color) {
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      const piece = board[row][col];
+      if (piece && piece.color === color && getLegalMoves(board, { row, col }).length > 0) return true;
+    }
+  }
+  return false;
+}
+
+function otherColor(color) {
+  return color === "red" ? "black" : "red";
+}
+
+const PIECE_VALUES = { general: 1000, chariot: 9, cannon: 4.5, horse: 4, elephant: 2, advisor: 2, soldier: 1 };
+const PIECE_NAMES = { general: "General", chariot: "Chariot", cannon: "Cannon", horse: "Horse", elephant: "Elephant", advisor: "Advisor", soldier: "Soldier" };
+
+function suggestMove(board, color) {
+  const enemyColor = otherColor(color);
+  let best = null;
+
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      const piece = board[row][col];
+      if (!piece || piece.color !== color) continue;
+      const from = { row, col };
+      const legal = getLegalMoves(board, from);
+
+      for (const to of legal) {
+        const captured = board[to.row][to.col];
+        const next = cloneBoard(board);
+        next[to.row][to.col] = piece;
+        next[from.row][from.col] = null;
+        const givesCheck = isInCheck(next, enemyColor);
+
+        let score = 0;
+        if (captured) score += PIECE_VALUES[captured.type] * 10;
+        if (givesCheck) score += 6;
+        score += Math.random() * 0.5;
+
+        if (!best || score > best.score) best = { from, to, score, captured, givesCheck };
+      }
+    }
+  }
+
+  if (!best) return null;
+
+  const pieceLabel = PIECE_NAMES[board[best.from.row][best.from.col].type];
+  let reason;
+  if (best.captured) reason = `Move your ${pieceLabel} to capture the enemy ${PIECE_NAMES[best.captured.type]}.`;
+  else if (best.givesCheck) reason = `Move your ${pieceLabel} to put the enemy General in check.`;
+  else reason = `Try advancing your ${pieceLabel} to open up more options.`;
+
+  return { from: best.from, to: best.to, reason };
+}
+
+// ---------------------------------------------------------------------------
+// UI data
+// ---------------------------------------------------------------------------
+
+const PIECE_TIPS = [
+  { type: "general", label: "General (帥 / 將)", tip: "Moves one point orthogonally, and must stay inside its 3×3 palace. Two Generals can never face each other on an open file with nothing between them." },
+  { type: "advisor", label: "Advisor (仕 / 士)", tip: "Moves one point diagonally, and never leaves the palace." },
+  { type: "elephant", label: "Elephant (相 / 象)", tip: "Moves exactly two points diagonally, can't cross the river, and is blocked if the midpoint is occupied." },
+  { type: "horse", label: "Horse (傌 / 馬)", tip: "Moves like a knight, but is blocked if the adjacent orthogonal point in its direction of travel is occupied ('hobbling the horse's leg')." },
+  { type: "chariot", label: "Chariot (俥 / 車)", tip: "Slides any distance along rows or columns, like a rook. Usually the strongest piece on the board." },
+  { type: "cannon", label: "Cannon (炮 / 砲)", tip: "Slides like a chariot when not capturing, but to capture it must jump over exactly one piece (of either color) first." },
+  { type: "soldier", label: "Soldier (兵 / 卒)", tip: "Moves one point forward only — until it crosses the river, after which it can also move one point sideways. Never moves backward." },
+];
+
+const STRATEGY_TIPS = [
+  "Develop your Horses and Cannons early — Chariots are already strong on open files.",
+  "Cannons are most powerful before the board empties out; they need a piece to jump over.",
+  "Keep your Advisors and Elephants near the palace — they defend the General and can't cross the river anyway.",
+  "Watch out for the 'flying General' rule: never leave your General facing the enemy General on a clear file.",
+  "A player with no legal moves loses immediately in Xiangqi — even if their General isn't in check.",
+];
+
+const PIECE_LABELS = {
+  red: { general: "帥", advisor: "仕", elephant: "相", horse: "傌", chariot: "俥", cannon: "炮", soldier: "兵" },
+  black: { general: "將", advisor: "士", elephant: "象", horse: "馬", chariot: "車", cannon: "砲", soldier: "卒" },
+};
+
+const CELL = 56;
+const MARGIN = 32;
+const BOARD_WIDTH = MARGIN * 2 + (COLS - 1) * CELL;
+const BOARD_HEIGHT = MARGIN * 2 + (ROWS - 1) * CELL;
+
+function x(col) { return MARGIN + col * CELL; }
+function y(row) { return MARGIN + row * CELL; }
+
+// ---------------------------------------------------------------------------
+// State
+// ---------------------------------------------------------------------------
+
+const state = {
+  mode: "two-player", // "two-player" | "vs-computer" | "online"
+  humanColor: "red",
+  board: createInitialBoard(),
+  turn: "red",
+  selected: null,
+  history: [],
+  lastMove: null,
+  status: { over: false },
+  hint: null,
+  showHelp: false,
+  thinking: false,
+  linkCopied: false,
+  online: { roomId: null, color: null, status: "idle", error: null },
+};
+
+let peer = null;
+let conn = null;
+let applyingRemoteMove = false;
+
+function computerColor() {
+  return state.mode === "vs-computer" ? otherColor(state.humanColor) : null;
+}
+
+// ---------------------------------------------------------------------------
+// Game actions
+// ---------------------------------------------------------------------------
+
+function resetGame() {
+  state.board = createInitialBoard();
+  state.turn = "red";
+  state.selected = null;
+  state.history = [];
+  state.lastMove = null;
+  state.status = { over: false };
+  state.hint = null;
+  state.thinking = false;
+  render();
+}
+
+function applyMove(from, to) {
+  const movingPiece = state.board[from.row][from.col];
+  if (!movingPiece) return;
+  const next = cloneBoard(state.board);
+  next[to.row][to.col] = movingPiece;
+  next[from.row][from.col] = null;
+
+  state.history.push({ board: state.board, turn: state.turn });
+  const moverColor = state.turn;
+  state.board = next;
+  state.lastMove = { from, to };
+  state.selected = null;
+  state.hint = null;
+
+  const nextTurn = otherColor(moverColor);
+  state.turn = nextTurn;
+
+  if (!hasAnyLegalMove(next, nextTurn)) {
+    const reason = isInCheck(next, nextTurn) ? "checkmate" : "stalemate";
+    state.status = { over: true, winner: moverColor, reason };
+  } else {
+    state.status = { over: false };
+  }
+
+  if (state.mode === "online" && !applyingRemoteMove) {
+    sendOnline({ type: "move", from, to });
+  }
+
+  render();
+}
+
+function undoMove() {
+  if (state.history.length === 0 || state.status.over || state.thinking) return;
+  const stepsBack = state.mode === "vs-computer" && state.history.length >= 2 ? 2 : 1;
+  const prev = state.history[state.history.length - stepsBack];
+  state.board = prev.board;
+  state.turn = prev.turn;
+  state.history = state.history.slice(0, -stepsBack);
+  state.selected = null;
+  state.lastMove = null;
+  state.status = { over: false };
+  state.hint = null;
+  render();
+}
+
+function handleSquareClick(row, col) {
+  if (state.status.over || state.thinking) return;
+  const cc = computerColor();
+  if (cc && state.turn === cc) return;
+  if (state.mode === "online" && (state.online.status !== "connected" || state.turn !== state.online.color)) return;
+
+  const piece = state.board[row][col];
+  const pos = { row, col };
+
+  if (state.selected) {
+    const legal = getLegalMoves(state.board, state.selected);
+    if (legal.some((m) => m.row === row && m.col === col)) {
+      applyMove(state.selected, pos);
+      return;
+    }
+    if (piece && piece.color === state.turn) {
+      state.selected = pos;
+      render();
+      return;
+    }
+    state.selected = null;
+    render();
+    return;
+  }
+
+  if (piece && piece.color === state.turn) {
+    state.selected = pos;
+    render();
+  }
+}
+
+function requestHint() {
+  if (state.status.over || state.thinking) return;
+  const cc = computerColor();
+  if (cc && state.turn === cc) return;
+  state.hint = suggestMove(state.board, state.turn);
+  render();
+}
+
+function maybeTriggerComputerMove() {
+  const cc = computerColor();
+  if (!cc || state.turn !== cc || state.status.over || state.thinking) return;
+  state.thinking = true;
+  render();
+  setTimeout(() => {
+    const move = suggestMove(state.board, cc);
+    state.thinking = false;
+    if (move) applyMove(move.from, move.to);
+    else render();
+  }, 500);
+}
+
+function changeMode(nextMode) {
+  if (nextMode === state.mode) return;
+  if (state.mode === "online") teardownOnline();
+  state.mode = nextMode;
+  resetGame();
+}
+
+function changeHumanColor(color) {
+  state.humanColor = color;
+  resetGame();
+}
+
+function toggleHelp() {
+  state.showHelp = !state.showHelp;
+  render();
+}
+
+// ---------------------------------------------------------------------------
+// Online (WebRTC via PeerJS public broker — no custom backend required)
+// ---------------------------------------------------------------------------
+
+function randomRoomId() {
+  return (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`).replace(/-/g, "");
+}
+
+function setOnlineError(err) {
+  state.online.status = "error";
+  const type = err && err.type;
+  state.online.error =
+    type === "unavailable-id" ? "This game link already has two players." :
+    type === "peer-unavailable" ? "Couldn't find that game. It may have ended." :
+    "Something went wrong connecting to the game.";
+  render();
+}
+
+function wireConnection(c) {
+  c.on("open", () => {
+    state.online.status = "connected";
+    render();
+  });
+  c.on("data", (message) => handleRemoteMessage(message));
+  c.on("close", () => {
+    state.online.status = "opponent-left";
+    render();
+  });
+  c.on("error", () => setOnlineError());
+}
+
+function handleRemoteMessage(message) {
+  if (!message || typeof message !== "object") return;
+  if (message.type === "move") {
+    applyingRemoteMove = true;
+    applyMove(message.from, message.to);
+    applyingRemoteMove = false;
+  } else if (message.type === "reset") {
+    resetGame();
+  }
+}
+
+function sendOnline(message) {
+  if (conn && conn.open) conn.send(message);
+}
+
+function createOnlineGame() {
+  const roomId = randomRoomId();
+  const url = new URL(location.href);
+  url.searchParams.set("room", roomId);
+  history.replaceState(null, "", url);
+
+  state.online = { roomId, color: null, status: "connecting", error: null };
+  resetGame();
+
+  peer = new Peer(roomId);
+  peer.on("open", () => {
+    state.online.status = "waiting";
+    render();
+  });
+  peer.on("connection", (c) => {
+    conn = c;
+    state.online.color = "red";
+    wireConnection(c);
+  });
+  peer.on("error", (err) => setOnlineError(err));
+}
+
+function joinOnlineRoom(roomId) {
+  state.mode = "online";
+  state.online = { roomId, color: "black", status: "connecting", error: null };
+  resetGame();
+
+  peer = new Peer();
+  peer.on("open", () => {
+    conn = peer.connect(roomId, { reliable: true });
+    wireConnection(conn);
+  });
+  peer.on("error", (err) => setOnlineError(err));
+}
+
+function teardownOnline() {
+  if (conn) { try { conn.close(); } catch (e) {} conn = null; }
+  if (peer) { try { peer.destroy(); } catch (e) {} peer = null; }
+  applyingRemoteMove = false;
+  state.online = { roomId: null, color: null, status: "idle", error: null };
+}
+
+function rematch() {
+  resetGame();
+  sendOnline({ type: "reset" });
+}
+
+async function copyRoomLink() {
+  try {
+    await navigator.clipboard.writeText(location.href);
+    state.linkCopied = true;
+    render();
+    setTimeout(() => { state.linkCopied = false; render(); }, 2000);
+  } catch (e) {
+    // Clipboard API may be unavailable; the link is still visible/selectable in the input field.
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Rendering
+// ---------------------------------------------------------------------------
+
+function escapeAttr(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+}
+
+function renderModeTabs() {
+  const modeBtn = (mode, label) =>
+    `<button class="${state.mode === mode ? "active" : ""}" onclick="changeMode('${mode}')">${label}</button>`;
+  let html = `<div class="tabgroup">${modeBtn("two-player", "Two Players")}${modeBtn("vs-computer", "Vs Computer")}${modeBtn("online", "Play Online")}</div>`;
+
+  if (state.mode === "vs-computer") {
+    html += `<div class="tabgroup">
+      <button class="${state.humanColor === "red" ? "active red" : ""}" onclick="changeHumanColor('red')">Play Red</button>
+      <button class="${state.humanColor === "black" ? "active" : ""}" onclick="changeHumanColor('black')">Play Black</button>
+    </div>`;
+  }
+
+  html += `<button class="pill-btn" onclick="toggleHelp()">${state.showHelp ? "Hide Rules" : "How to Play"}</button>`;
+  return html;
+}
+
+function renderOnlinePanel() {
+  if (state.mode !== "online") return "";
+
+  if (!state.online.roomId) {
+    return `<div class="panel center">
+      <p>Create a game and send the link to a friend to play remotely. No accounts, no install — just the link.</p>
+      <button class="pill-btn primary" onclick="createOnlineGame()">Create Game</button>
+    </div>`;
+  }
+
+  const statusLine = (() => {
+    switch (state.online.status) {
+      case "connecting": return `<p>Connecting…</p>`;
+      case "waiting": return `<p>Waiting for your opponent to open the link…</p>`;
+      case "connected": return `<p>Connected — you are playing <strong>${state.online.color}</strong>.</p>`;
+      case "opponent-left": return `<p class="amber">Your opponent disconnected.</p>`;
+      case "error": return `<p style="color:#f87171">${escapeAttr(state.online.error)}</p>`;
+      default: return "";
+    }
+  })();
+
+  return `<div class="panel center">
+    <div class="link-row">
+      <input readonly value="${escapeAttr(location.href)}" onfocus="this.select()" />
+      <button class="pill-btn" onclick="copyRoomLink()">${state.linkCopied ? "Copied!" : "Copy Link"}</button>
+    </div>
+    ${statusLine}
+  </div>`;
+}
+
+function renderHelpPanel() {
+  if (!state.showHelp) return "";
+  const pieceItems = PIECE_TIPS.map((p) => `<li><strong>${p.label}:</strong> ${p.tip}</li>`).join("");
+  const strategyItems = STRATEGY_TIPS.map((t) => `<li>${t}</li>`).join("");
+  return `<div class="panel" style="text-align:left; max-width:640px;">
+    <h3>Objective</h3>
+    <p>Checkmate the enemy General, or leave your opponent with no legal move at all — both end the game immediately. Red always moves first.</p>
+    <h3>How each piece moves</h3>
+    <ul>${pieceItems}</ul>
+    <h3>Tips for learning</h3>
+    <ul style="list-style:disc;">${strategyItems}</ul>
+  </div>`;
+}
+
+function renderStatusPills() {
+  const inCheck = !state.status.over && isInCheck(state.board, state.turn);
+  let html = `<div class="row">`;
+
+  const turnClass = state.turn === "red" ? "turn-red" : "turn-black";
+  const turnText = state.status.over
+    ? "Game Over"
+    : state.thinking
+      ? "Computer is thinking…"
+      : `${state.turn === "red" ? "Red" : "Black"} to move`;
+  html += `<div class="status-pill ${turnClass}">${turnText}</div>`;
+
+  if (!state.status.over && !state.thinking && inCheck) {
+    html += `<div class="status-pill check">Check!</div>`;
+  }
+  if (state.status.over) {
+    html += `<div class="status-pill over">${state.status.winner === "red" ? "Red" : "Black"} wins by ${state.status.reason}</div>`;
+  }
+  html += `</div>`;
+  return html;
+}
+
+function renderBoard() {
+  const { board, selected, lastMove, hint } = state;
+  const legalMoves = selected ? getLegalMoves(board, selected) : [];
+
+  let lines = "";
+  for (let row = 0; row < ROWS; row++) {
+    lines += `<line x1="${x(0)}" y1="${y(row)}" x2="${x(COLS - 1)}" y2="${y(row)}" stroke="#5c4326" stroke-width="1.5" />`;
+  }
+  for (let col = 0; col < COLS; col++) {
+    const isEdge = col === 0 || col === COLS - 1;
+    if (isEdge) {
+      lines += `<line x1="${x(col)}" y1="${y(0)}" x2="${x(col)}" y2="${y(ROWS - 1)}" stroke="#5c4326" stroke-width="1.5" />`;
+    } else {
+      lines += `<line x1="${x(col)}" y1="${y(0)}" x2="${x(col)}" y2="${y(4)}" stroke="#5c4326" stroke-width="1.5" />`;
+      lines += `<line x1="${x(col)}" y1="${y(5)}" x2="${x(col)}" y2="${y(ROWS - 1)}" stroke="#5c4326" stroke-width="1.5" />`;
+    }
+  }
+
+  const palace = `
+    <line x1="${x(3)}" y1="${y(0)}" x2="${x(5)}" y2="${y(2)}" stroke="#5c4326" stroke-width="1.5" />
+    <line x1="${x(5)}" y1="${y(0)}" x2="${x(3)}" y2="${y(2)}" stroke="#5c4326" stroke-width="1.5" />
+    <line x1="${x(3)}" y1="${y(7)}" x2="${x(5)}" y2="${y(9)}" stroke="#5c4326" stroke-width="1.5" />
+    <line x1="${x(5)}" y1="${y(7)}" x2="${x(3)}" y2="${y(9)}" stroke="#5c4326" stroke-width="1.5" />
+  `;
+
+  const river = `
+    <text x="${x(1.5)}" y="${y(4.5) + 8}" font-size="20" fill="#5c4326" font-family="serif" text-anchor="middle">楚 河</text>
+    <text x="${x(6.5)}" y="${y(4.5) + 8}" font-size="20" fill="#5c4326" font-family="serif" text-anchor="middle">漢 界</text>
+  `;
+
+  const lastMoveHtml = lastMove ? `
+    <circle cx="${x(lastMove.from.col)}" cy="${y(lastMove.from.row)}" r="${CELL / 2 - 6}" fill="none" stroke="#2563eb" stroke-width="2" stroke-dasharray="4 3" opacity="0.6" />
+    <circle cx="${x(lastMove.to.col)}" cy="${y(lastMove.to.row)}" r="${CELL / 2 - 6}" fill="none" stroke="#2563eb" stroke-width="2" opacity="0.6" />
+  ` : "";
+
+  const hintHtml = hint ? `
+    <circle cx="${x(hint.from.col)}" cy="${y(hint.from.row)}" r="${CELL / 2 - 3}" fill="none" stroke="#f59e0b" stroke-width="3" stroke-dasharray="5 4" />
+    <circle cx="${x(hint.to.col)}" cy="${y(hint.to.row)}" r="${CELL / 2 - 3}" fill="none" stroke="#f59e0b" stroke-width="3" />
+  ` : "";
+
+  const legalHtml = legalMoves.map((m) => {
+    const occupied = board[m.row][m.col];
+    return occupied
+      ? `<circle cx="${x(m.col)}" cy="${y(m.row)}" r="${CELL / 2 - 4}" fill="none" stroke="rgba(16,185,129,0.85)" stroke-width="3" class="sq-ignore" />`
+      : `<circle cx="${x(m.col)}" cy="${y(m.row)}" r="7" fill="rgba(16,185,129,0.55)" class="sq-ignore" />`;
+  }).join("");
+
+  let squaresHtml = "";
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      const piece = board[row][col];
+      const isSelected = selected && selected.row === row && selected.col === col;
+      squaresHtml += `<g class="sq" data-square data-row="${row}" data-col="${col}">
+        <rect x="${x(col) - CELL / 2}" y="${y(row) - CELL / 2}" width="${CELL}" height="${CELL}" fill="transparent" />
+        ${isSelected ? `<circle cx="${x(col)}" cy="${y(row)}" r="${CELL / 2 - 4}" fill="none" stroke="#0ea5e9" stroke-width="3" />` : ""}
+        ${piece ? `
+          <circle cx="${x(col)}" cy="${y(row)}" r="${CELL / 2 - 8}" fill="#f3e6c8" stroke="${piece.color === "red" ? "#b91c1c" : "#18181b"}" stroke-width="2.5" />
+          <text x="${x(col)}" y="${y(row) + 8}" font-size="22" font-family="serif" font-weight="700" text-anchor="middle" fill="${piece.color === "red" ? "#b91c1c" : "#18181b"}">${PIECE_LABELS[piece.color][piece.type]}</text>
+        ` : ""}
+      </g>`;
+    }
+  }
+
+  return `<div class="board-frame">
+    <svg width="${BOARD_WIDTH}" height="${BOARD_HEIGHT}" viewBox="0 0 ${BOARD_WIDTH} ${BOARD_HEIGHT}" role="img" aria-label="Xiangqi board">
+      ${lines}${palace}${river}${lastMoveHtml}${hintHtml}${legalHtml}${squaresHtml}
+    </svg>
+  </div>`;
+}
+
+function renderControls() {
+  const hasActiveOnlineRoom = state.mode !== "online" || state.online.roomId;
+  if (!hasActiveOnlineRoom) return "";
+
+  const cc = computerColor();
+  const hintDisabled = state.status.over || state.thinking || (cc !== null && state.turn === cc);
+  const undoDisabled = state.history.length === 0 || state.thinking || state.status.over;
+
+  let html = `<div class="row">
+    <button class="pill-btn amber" ${hintDisabled ? "disabled" : ""} onclick="requestHint()">Hint</button>`;
+
+  if (state.mode !== "online") {
+    html += `<button class="pill-btn" ${undoDisabled ? "disabled" : ""} onclick="undoMove()">Undo</button>`;
+  }
+
+  html += state.mode === "online"
+    ? `<button class="pill-btn" onclick="rematch()">Rematch</button>`
+    : `<button class="pill-btn" onclick="resetGame()">New Game</button>`;
+
+  html += `</div>`;
+  return html;
+}
+
+function renderFooterCaption() {
+  if (state.hint && !state.status.over) {
+    return `<p class="hint-reason">Hint: ${state.hint.reason}</p>`;
+  }
+  const selectedPiece = state.selected ? state.board[state.selected.row][state.selected.col] : null;
+  if (selectedPiece && !state.status.over && !state.hint) {
+    return `<p class="selected-caption">Selected: ${selectedPiece.color} ${selectedPiece.type} — tap a highlighted square to move.</p>`;
+  }
+  return "";
+}
+
+function render() {
+  const app = document.getElementById("app");
+  app.innerHTML = `
+    <div class="row">${renderModeTabs()}</div>
+    ${renderOnlinePanel()}
+    ${renderHelpPanel()}
+    ${renderStatusPills()}
+    ${renderBoard()}
+    ${renderControls()}
+    ${renderFooterCaption()}
+  `;
+  maybeTriggerComputerMove();
+}
+
+// Delegate square clicks once; render() only replaces innerHTML, it never
+// re-attaches this listener.
+document.getElementById("app").addEventListener("click", (event) => {
+  const square = event.target.closest("[data-square]");
+  if (!square) return;
+  handleSquareClick(Number(square.dataset.row), Number(square.dataset.col));
+});
+
+// Auto-join a room shared via link, e.g. ?room=<id>.
+const roomFromUrl = new URLSearchParams(location.search).get("room");
+if (roomFromUrl) {
+  joinOnlineRoom(roomFromUrl);
+} else {
+  render();
+}
+</script>
+</body>
+</html>
