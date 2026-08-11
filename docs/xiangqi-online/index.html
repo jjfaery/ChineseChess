@@ -553,13 +553,29 @@ function setOnlineError(err) {
   render();
 }
 
-function wireConnection(c) {
+let joinAttempts = 0;
+
+function wireConnection(c, roomIdForRetry) {
   c.on("open", () => {
     state.online.status = "connected";
+    joinAttempts = 0;
     render();
   });
   c.on("data", (message) => handleRemoteMessage(message));
   c.on("close", () => {
+    // Joiner side: a dropped connection is often just a transient network
+    // blip (mobile in-app browsers in particular suspend background tabs
+    // aggressively), so retry a few times before giving up. Host side just
+    // waits — its peer.on("connection") listener stays live for a fresh
+    // incoming connection if the joiner reconnects.
+    const isJoiner = state.online.color === "black";
+    if (isJoiner && roomIdForRetry && joinAttempts < 3 && peer && !peer.destroyed) {
+      joinAttempts += 1;
+      state.online.status = "connecting";
+      render();
+      setTimeout(() => setupJoinConnection(roomIdForRetry), 1500);
+      return;
+    }
     state.online.status = "opponent-left";
     render();
   });
@@ -581,15 +597,7 @@ function sendOnline(message) {
   if (conn && conn.open) conn.send(message);
 }
 
-function createOnlineGame() {
-  const roomId = randomRoomId();
-  const url = new URL(location.href);
-  url.searchParams.set("room", roomId);
-  history.replaceState(null, "", url);
-
-  state.online = { roomId, color: null, status: "connecting", error: null };
-  resetGame();
-
+function setupHostPeer(roomId, isRetry) {
   peer = new Peer(roomId);
   peer.on("open", () => {
     state.online.status = "waiting";
@@ -600,18 +608,61 @@ function createOnlineGame() {
     state.online.color = "red";
     wireConnection(c);
   });
-  peer.on("error", (err) => setOnlineError(err));
+  peer.on("disconnected", () => {
+    // The signaling connection to the broker dropped (common when a mobile
+    // browser suspends a backgrounded tab) but our Peer object is still
+    // alive — try to resume it under the same room id.
+    if (peer && !peer.destroyed) peer.reconnect();
+  });
+  peer.on("error", (err) => {
+    // A fresh reload can race the broker cleaning up our previous
+    // registration under this id; one short retry covers that window.
+    if (err && err.type === "unavailable-id" && !isRetry) {
+      setTimeout(() => setupHostPeer(roomId, true), 1500);
+      return;
+    }
+    setOnlineError(err);
+  });
+}
+
+function createOnlineGame() {
+  const roomId = randomRoomId();
+  const url = new URL(location.href);
+  url.searchParams.set("room", roomId);
+  history.replaceState(null, "", url);
+  try { sessionStorage.setItem("xiangqiHostRoomId", roomId); } catch (e) {}
+
+  state.online = { roomId, color: null, status: "connecting", error: null };
+  resetGame();
+  setupHostPeer(roomId);
+}
+
+// A page reload with ?room=<id> in the URL always looks the same whether
+// you created the game or joined it — this restores the host role instead
+// of misreading your own reload as a fresh join attempt against your own
+// (now-dead) connection.
+function resumeAsHost(roomId) {
+  state.mode = "online";
+  state.online = { roomId, color: null, status: "connecting", error: null };
+  resetGame();
+  setupHostPeer(roomId);
+}
+
+function setupJoinConnection(roomId) {
+  conn = peer.connect(roomId, { reliable: true });
+  wireConnection(conn, roomId);
 }
 
 function joinOnlineRoom(roomId) {
   state.mode = "online";
   state.online = { roomId, color: "black", status: "connecting", error: null };
   resetGame();
+  joinAttempts = 0;
 
   peer = new Peer();
-  peer.on("open", () => {
-    conn = peer.connect(roomId, { reliable: true });
-    wireConnection(conn);
+  peer.on("open", () => setupJoinConnection(roomId));
+  peer.on("disconnected", () => {
+    if (peer && !peer.destroyed) peer.reconnect();
   });
   peer.on("error", (err) => setOnlineError(err));
 }
@@ -620,6 +671,7 @@ function teardownOnline() {
   if (conn) { try { conn.close(); } catch (e) {} conn = null; }
   if (peer) { try { peer.destroy(); } catch (e) {} peer = null; }
   applyingRemoteMove = false;
+  try { sessionStorage.removeItem("xiangqiHostRoomId"); } catch (e) {}
   state.online = { roomId: null, color: null, status: "idle", error: null };
 }
 
@@ -855,10 +907,18 @@ document.getElementById("app").addEventListener("click", (event) => {
   handleSquareClick(Number(square.dataset.row), Number(square.dataset.col));
 });
 
-// Auto-join a room shared via link, e.g. ?room=<id>.
+// Auto-join a room shared via link, e.g. ?room=<id>. A reload of the host's
+// own tab carries the same ?room= param, so sessionStorage is what tells
+// the two cases apart.
 const roomFromUrl = new URLSearchParams(location.search).get("room");
 if (roomFromUrl) {
-  joinOnlineRoom(roomFromUrl);
+  let wasHost = false;
+  try { wasHost = sessionStorage.getItem("xiangqiHostRoomId") === roomFromUrl; } catch (e) {}
+  if (wasHost) {
+    resumeAsHost(roomFromUrl);
+  } else {
+    joinOnlineRoom(roomFromUrl);
+  }
 } else {
   render();
 }
