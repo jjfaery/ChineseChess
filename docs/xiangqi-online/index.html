@@ -45,8 +45,16 @@
   .board-frame svg { max-width: 100%; height: auto; display: block; }
   .sq { cursor: pointer; }
   .amber { color: #fcd34d; }
-  .hint-reason { font-size: 0.75rem; color: rgba(252,211,77,0.8); max-width: 28rem; text-align: center; }
   .selected-caption { font-size: 0.75rem; color: rgba(255,255,255,0.4); }
+  .hint-option { display: block; width: 100%; text-align: left; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 10px 14px; margin-bottom: 8px; cursor: pointer; color: rgba(255,255,255,0.8); font: inherit; transition: border-color 0.15s, background 0.15s; }
+  .hint-option:last-child { margin-bottom: 0; }
+  .hint-option:hover { border-color: rgba(255,255,255,0.3); }
+  .hint-option.active { border-color: #f59e0b; background: rgba(245,158,11,0.08); }
+  .hint-option-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
+  .hint-rank { font-size: 0.7rem; color: rgba(255,255,255,0.4); font-weight: 600; }
+  .hint-move { font-size: 0.8rem; color: #fff; font-weight: 600; }
+  .hint-tag { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 8px; border-radius: 999px; background: rgba(245,158,11,0.2); color: #fcd34d; }
+  .hint-option-text { font-size: 0.8rem; color: rgba(255,255,255,0.65); line-height: 1.4; }
 </style>
 </head>
 <body>
@@ -303,43 +311,148 @@ function otherColor(color) {
 const PIECE_VALUES = { general: 1000, chariot: 9, cannon: 4.5, horse: 4, elephant: 2, advisor: 2, soldier: 1 };
 const PIECE_NAMES = { general: "General", chariot: "Chariot", cannon: "Cannon", horse: "Horse", elephant: "Elephant", advisor: "Advisor", soldier: "Soldier" };
 
-function suggestMove(board, color) {
-  const enemyColor = otherColor(color);
+// ---------------------------------------------------------------------------
+// Move evaluation — a shallow ("think one move ahead") search: for each
+// candidate move, also look at the opponent's strongest immediate reply, so
+// a move that looks good right now but simply hangs a piece gets caught and
+// explained, not just recommended for its surface-level capture/check value.
+// This is still a heuristic, not a full engine, but it reasons the way a
+// club player actually does when picking between a few candidate moves.
+// ---------------------------------------------------------------------------
+
+function materialBalance(board) {
+  let score = 0;
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      const piece = board[row][col];
+      if (piece) score += (piece.color === "red" ? 1 : -1) * PIECE_VALUES[piece.type];
+    }
+  }
+  return score;
+}
+
+function materialFor(board, color) {
+  const balance = materialBalance(board);
+  return color === "red" ? balance : -balance;
+}
+
+function applyMoveToBoard(board, from, to) {
+  const piece = board[from.row][from.col];
+  const next = cloneBoard(board);
+  next[to.row][to.col] = piece;
+  next[from.row][from.col] = null;
+  return next;
+}
+
+// Opponent's single strongest-looking immediate reply (by capture value,
+// then check), used only to test how well a candidate move for the other
+// side holds up — not a recursive search, so this stays fast.
+function bestImmediateReply(board, color) {
   let best = null;
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      const piece = board[row][col];
+      if (!piece || piece.color !== color) continue;
+      const from = { row, col };
+      for (const to of getLegalMoves(board, from)) {
+        const captured = board[to.row][to.col];
+        const gain = captured ? PIECE_VALUES[captured.type] : 0;
+        if (!best || gain > best.gain) best = { from, to, gain, captured };
+      }
+    }
+  }
+  if (!best) return null;
+  return { move: best, resultingBoard: applyMoveToBoard(board, best.from, best.to) };
+}
+
+const HINT_SHORTLIST_SIZE = 8;
+
+function getTopMoves(board, color, count) {
+  const enemyColor = otherColor(color);
+  const candidates = [];
 
   for (let row = 0; row < ROWS; row++) {
     for (let col = 0; col < COLS; col++) {
       const piece = board[row][col];
       if (!piece || piece.color !== color) continue;
       const from = { row, col };
-      const legal = getLegalMoves(board, from);
-
-      for (const to of legal) {
+      for (const to of getLegalMoves(board, from)) {
         const captured = board[to.row][to.col];
-        const next = cloneBoard(board);
-        next[to.row][to.col] = piece;
-        next[from.row][from.col] = null;
+        const next = applyMoveToBoard(board, from, to);
         const givesCheck = isInCheck(next, enemyColor);
-
-        let score = 0;
-        if (captured) score += PIECE_VALUES[captured.type] * 10;
-        if (givesCheck) score += 6;
-        score += Math.random() * 0.5;
-
-        if (!best || score > best.score) best = { from, to, score, captured, givesCheck };
+        const quickScore = (captured ? PIECE_VALUES[captured.type] * 10 : 0) + (givesCheck ? 6 : 0);
+        candidates.push({ from, to, piece, captured, givesCheck, next, quickScore });
       }
     }
   }
 
-  if (!best) return null;
+  if (candidates.length === 0) return [];
 
-  const pieceLabel = PIECE_NAMES[board[best.from.row][best.from.col].type];
-  let reason;
-  if (best.captured) reason = `Move your ${pieceLabel} to capture the enemy ${PIECE_NAMES[best.captured.type]}.`;
-  else if (best.givesCheck) reason = `Move your ${pieceLabel} to put the enemy General in check.`;
-  else reason = `Try advancing your ${pieceLabel} to open up more options.`;
+  candidates.sort((a, b) => b.quickScore - a.quickScore);
+  const shortlist = candidates.slice(0, HINT_SHORTLIST_SIZE);
 
-  return { from: best.from, to: best.to, reason };
+  for (const c of shortlist) {
+    const immediateMaterial = materialFor(c.next, color);
+    const reply = bestImmediateReply(c.next, enemyColor);
+
+    if (!reply) {
+      // Opponent has no legal reply at all: checkmate if we just gave
+      // check, otherwise we walked them into stalemate.
+      c.netMaterial = immediateMaterial + (c.givesCheck ? 1000 : -50);
+      c.hangs = false;
+      c.reply = null;
+      c.gameEnds = c.givesCheck ? "checkmate" : "stalemate";
+    } else {
+      c.netMaterial = materialFor(reply.resultingBoard, color);
+      c.hangs = c.netMaterial < immediateMaterial - 0.5;
+      c.reply = reply.move;
+      c.gameEnds = null;
+    }
+
+    c.finalScore = c.netMaterial * 10 + (c.givesCheck ? 3 : 0) + Math.random() * 0.3;
+  }
+
+  shortlist.sort((a, b) => b.finalScore - a.finalScore);
+  return shortlist.slice(0, count).map((c) => ({ ...c, explanation: explainCandidate(c) }));
+}
+
+function explainCandidate(c) {
+  const pieceLabel = PIECE_NAMES[c.piece.type];
+
+  if (c.gameEnds === "checkmate") {
+    return { tag: "Checkmate", text: "Delivers checkmate — the game ends immediately." };
+  }
+  if (c.gameEnds === "stalemate") {
+    return { tag: "Forces stalemate", text: "Leaves the opponent with no legal move at all, ending the game by stalemate." };
+  }
+  if (c.captured && !c.hangs) {
+    return {
+      tag: "Wins material",
+      text: `Captures the enemy ${PIECE_NAMES[c.captured.type]} — the opponent has no reply that wins it back, a clean material gain.`,
+    };
+  }
+  if (c.captured && c.hangs) {
+    return {
+      tag: "Trade — check the math",
+      text: `Captures the enemy ${PIECE_NAMES[c.captured.type]}, but the opponent can reply by taking your ${pieceLabel} back — worth playing only if that trade favors you.`,
+    };
+  }
+  if (c.givesCheck && !c.hangs) {
+    return {
+      tag: "Forcing",
+      text: "Puts the enemy General in check, forcing an immediate response and handing you the initiative.",
+    };
+  }
+  if (c.hangs) {
+    return {
+      tag: "Risky",
+      text: `Creates pressure, but leaves your ${pieceLabel} exposed — the opponent's best reply wins it back.`,
+    };
+  }
+  return {
+    tag: "Developing",
+    text: `A quiet developing move for your ${pieceLabel} — no immediate tactics, but it improves your position for later.`,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -390,7 +503,8 @@ const state = {
   history: [],
   lastMove: null,
   status: { over: false },
-  hint: null,
+  hintOptions: null,
+  hintHighlightIndex: 0,
   showHelp: false,
   thinking: false,
   linkCopied: false,
@@ -416,7 +530,8 @@ function resetGame() {
   state.history = [];
   state.lastMove = null;
   state.status = { over: false };
-  state.hint = null;
+  state.hintOptions = null;
+  state.hintHighlightIndex = 0;
   state.thinking = false;
   render();
 }
@@ -433,7 +548,8 @@ function applyMove(from, to) {
   state.board = next;
   state.lastMove = { from, to };
   state.selected = null;
-  state.hint = null;
+  state.hintOptions = null;
+  state.hintHighlightIndex = 0;
 
   const nextTurn = otherColor(moverColor);
   state.turn = nextTurn;
@@ -462,7 +578,8 @@ function undoMove() {
   state.selected = null;
   state.lastMove = null;
   state.status = { over: false };
-  state.hint = null;
+  state.hintOptions = null;
+  state.hintHighlightIndex = 0;
   render();
 }
 
@@ -501,7 +618,14 @@ function requestHint() {
   if (state.status.over || state.thinking) return;
   const cc = computerColor();
   if (cc && state.turn === cc) return;
-  state.hint = suggestMove(state.board, state.turn);
+  state.hintOptions = getTopMoves(state.board, state.turn, 3);
+  state.hintHighlightIndex = 0;
+  render();
+}
+
+function selectHintOption(index) {
+  if (!state.hintOptions || !state.hintOptions[index]) return;
+  state.hintHighlightIndex = index;
   render();
 }
 
@@ -511,9 +635,9 @@ function maybeTriggerComputerMove() {
   state.thinking = true;
   render();
   setTimeout(() => {
-    const move = suggestMove(state.board, cc);
+    const options = getTopMoves(state.board, cc, 1);
     state.thinking = false;
-    if (move) applyMove(move.from, move.to);
+    if (options.length > 0) applyMove(options[0].from, options[0].to);
     else render();
   }, 500);
 }
@@ -782,8 +906,9 @@ function renderStatusPills() {
 }
 
 function renderBoard() {
-  const { board, selected, lastMove, hint } = state;
+  const { board, selected, lastMove, hintOptions, hintHighlightIndex } = state;
   const legalMoves = selected ? getLegalMoves(board, selected) : [];
+  const activeHint = hintOptions ? hintOptions[hintHighlightIndex] : null;
 
   let lines = "";
   for (let row = 0; row < ROWS; row++) {
@@ -816,9 +941,9 @@ function renderBoard() {
     <circle cx="${x(lastMove.to.col)}" cy="${y(lastMove.to.row)}" r="${CELL / 2 - 6}" fill="none" stroke="#2563eb" stroke-width="2" opacity="0.6" />
   ` : "";
 
-  const hintHtml = hint ? `
-    <circle cx="${x(hint.from.col)}" cy="${y(hint.from.row)}" r="${CELL / 2 - 3}" fill="none" stroke="#f59e0b" stroke-width="3" stroke-dasharray="5 4" />
-    <circle cx="${x(hint.to.col)}" cy="${y(hint.to.row)}" r="${CELL / 2 - 3}" fill="none" stroke="#f59e0b" stroke-width="3" />
+  const hintHtml = activeHint ? `
+    <circle cx="${x(activeHint.from.col)}" cy="${y(activeHint.from.row)}" r="${CELL / 2 - 3}" fill="none" stroke="#f59e0b" stroke-width="3" stroke-dasharray="5 4" />
+    <circle cx="${x(activeHint.to.col)}" cy="${y(activeHint.to.row)}" r="${CELL / 2 - 3}" fill="none" stroke="#f59e0b" stroke-width="3" />
   ` : "";
 
   const legalHtml = legalMoves.map((m) => {
@@ -874,12 +999,40 @@ function renderControls() {
   return html;
 }
 
+const FILES = "abcdefghi";
+function squareLabel(pos) {
+  return `${FILES[pos.col]}${pos.row}`;
+}
+
+function renderHintPanel() {
+  if (!state.hintOptions || state.hintOptions.length === 0 || state.status.over) return "";
+
+  const rows = state.hintOptions.map((opt, i) => {
+    const active = i === state.hintHighlightIndex;
+    const pieceLabel = PIECE_NAMES[opt.piece.type];
+    const moveLabel = opt.captured
+      ? `${pieceLabel} ${squareLabel(opt.from)} × ${PIECE_NAMES[opt.captured.type]} ${squareLabel(opt.to)}`
+      : `${pieceLabel} ${squareLabel(opt.from)} → ${squareLabel(opt.to)}`;
+    return `<button class="hint-option ${active ? "active" : ""}" onclick="selectHintOption(${i})">
+      <div class="hint-option-head">
+        <span class="hint-rank">#${i + 1}</span>
+        <span class="hint-move">${escapeAttr(moveLabel)}</span>
+        <span class="hint-tag">${escapeAttr(opt.explanation.tag)}</span>
+      </div>
+      <div class="hint-option-text">${escapeAttr(opt.explanation.text)}</div>
+    </button>`;
+  }).join("");
+
+  return `<div class="panel" style="max-width:640px; text-align:left;">
+    <h3 style="margin-bottom:8px;">Move Options</h3>
+    ${rows}
+  </div>`;
+}
+
 function renderFooterCaption() {
-  if (state.hint && !state.status.over) {
-    return `<p class="hint-reason">Hint: ${state.hint.reason}</p>`;
-  }
+  if (state.hintOptions) return "";
   const selectedPiece = state.selected ? state.board[state.selected.row][state.selected.col] : null;
-  if (selectedPiece && !state.status.over && !state.hint) {
+  if (selectedPiece && !state.status.over) {
     return `<p class="selected-caption">Selected: ${selectedPiece.color} ${selectedPiece.type} — tap a highlighted square to move.</p>`;
   }
   return "";
@@ -894,6 +1047,7 @@ function render() {
     ${renderStatusPills()}
     ${renderBoard()}
     ${renderControls()}
+    ${renderHintPanel()}
     ${renderFooterCaption()}
   `;
   maybeTriggerComputerMove();
