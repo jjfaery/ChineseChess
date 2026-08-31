@@ -365,6 +365,89 @@ function bestImmediateReply(board, color) {
   return { move: best, resultingBoard: applyMoveToBoard(board, best.from, best.to) };
 }
 
+// ---------------------------------------------------------------------------
+// Repetition rules — perpetual check (长将) and perpetual chase (长捉).
+//
+// Official Xiangqi rules forbid a player from repeating a position by
+// checking (or "chasing" — repeatedly threatening to win material from an
+// undefended piece) on every move of the cycle: the side doing it must vary
+// their move, or forfeits. If BOTH sides are forcing each other through the
+// whole cycle (mutual perpetual check/chase), it's a draw instead. Plain
+// repetition with no check or chase involved by either side is also a draw.
+//
+// "Check" is unambiguous. "Chase" is genuinely fuzzy even for human
+// tournament arbiters (official rule sets carve out several exemptions —
+// e.g. mutual attacks, certain piece pairings). The heuristic below judges a
+// move a "chase" if the piece just moved threatens a capture next turn that
+// would still net material after the opponent's best reply — a reasonable
+// approximation, not a tournament-certified adjudicator.
+// ---------------------------------------------------------------------------
+
+const PIECE_CODE = { general: "g", advisor: "a", elephant: "e", horse: "h", chariot: "r", cannon: "c", soldier: "s" };
+
+function positionKey(board, turn) {
+  let key = turn[0];
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      const piece = board[row][col];
+      key += piece ? (piece.color === "red" ? PIECE_CODE[piece.type].toUpperCase() : PIECE_CODE[piece.type]) : ".";
+    }
+  }
+  return key;
+}
+
+// Does the piece now at `at` threaten a capture next turn that still nets
+// material for `color` even after the opponent's single best defensive reply?
+function threatensProfitableCapture(boardAfter, color, at) {
+  const materialBefore = materialFor(boardAfter, color);
+  for (const dest of getLegalMoves(boardAfter, at)) {
+    const target = boardAfter[dest.row][dest.col];
+    if (!target || target.color === color) continue;
+    const afterCapture = applyMoveToBoard(boardAfter, at, dest);
+    const reply = bestImmediateReply(afterCapture, otherColor(color));
+    const materialAfter = reply ? materialFor(reply.resultingBoard, color) : materialFor(afterCapture, color);
+    if (materialAfter > materialBefore + 0.5) return true;
+  }
+  return false;
+}
+
+function moveIsChase(boardBefore, from, to) {
+  if (boardBefore[to.row][to.col]) return false; // a capture resolves the tension, it isn't "chasing"
+  const piece = boardBefore[from.row][from.col];
+  const after = applyMoveToBoard(boardBefore, from, to);
+  return threatensProfitableCapture(after, piece.color, to);
+}
+
+// Looks at the most recent repeated position and decides whether either side
+// was perpetually forcing (all-check and/or all-chase) through the cycle.
+// Returns null if there's no repetition verdict yet.
+function evaluateRepetition() {
+  const keys = state.positionKeys;
+  const lastKey = keys[keys.length - 1];
+  const occurrences = [];
+  for (let i = 0; i < keys.length; i++) if (keys[i] === lastKey) occurrences.push(i);
+  if (occurrences.length < 3) return null;
+
+  const endIdx = occurrences[occurrences.length - 1];
+  const startIdx = occurrences[occurrences.length - 2];
+  const cycleRecords = state.moveRecords.slice(startIdx, endIdx);
+  if (cycleRecords.length === 0) return null;
+
+  const byColor = { red: [], black: [] };
+  cycleRecords.forEach((r) => byColor[r.color].push(r));
+
+  const allForcing = (records) => records.length > 0 && records.every((r) => r.isCheck || r.isChase);
+  const describeForcing = (records) => (records.every((r) => r.isCheck) ? "perpetual check" : "perpetual chase");
+
+  const redForcing = allForcing(byColor.red);
+  const blackForcing = allForcing(byColor.black);
+
+  if (redForcing && blackForcing) return { type: "draw", reason: "mutual perpetual check" };
+  if (redForcing) return { type: "loss", loser: "red", reason: describeForcing(byColor.red) };
+  if (blackForcing) return { type: "loss", loser: "black", reason: describeForcing(byColor.black) };
+  return { type: "draw", reason: "repetition" };
+}
+
 const HINT_SHORTLIST_SIZE = 8;
 
 function getTopMoves(board, color, count) {
@@ -473,8 +556,16 @@ const STRATEGY_TIPS = [
   "Develop your Horses and Cannons early — Chariots are already strong on open files.",
   "Cannons are most powerful before the board empties out; they need a piece to jump over.",
   "Keep your Advisors and Elephants near the palace — they defend the General and can't cross the river anyway.",
-  "Watch out for the 'flying General' rule: never leave your General facing the enemy General on a clear file.",
-  "A player with no legal moves loses immediately in Xiangqi — even if their General isn't in check.",
+];
+
+const GAME_END_RULES = [
+  { label: "Checkmate", tip: "The side that delivers checkmate wins immediately." },
+  { label: "No legal moves (stalemate)", tip: "Unlike international chess, a player with no legal move loses in Xiangqi — even if their General isn't in check. There's no such thing as a stalemate draw here." },
+  { label: "Flying General", tip: "The two Generals can never face each other on a completely open file. A move that would expose that (even as a side effect) is illegal." },
+  { label: "Perpetual check (长将)", tip: "A player can't repeat a position by checking on every move of the cycle. If one side does this and the other side isn't also checking back, the checking side must play something else — refusing to vary loses the game for them." },
+  { label: "Perpetual chase (长捉)", tip: "Same idea as perpetual check, but for repeatedly threatening to win material from an undefended piece without ever capturing it. Note: official adjudication of \"chase\" has several nuanced exemptions (mutual attacks, certain piece pairings) that this app approximates rather than implements exactly." },
+  { label: "Mutual perpetual check/chase", tip: "If both sides are forcing each other (checking and/or chasing) all the way through the repeating cycle, it's a draw instead — neither side is uniquely at fault." },
+  { label: "Plain repetition", tip: "If a position repeats three times with no check or chase involved by either side, the game is a draw." },
 ];
 
 const PIECE_LABELS = {
@@ -501,6 +592,8 @@ const state = {
   turn: "red",
   selected: null,
   history: [],
+  positionKeys: [positionKey(createInitialBoard(), "red")],
+  moveRecords: [],
   lastMove: null,
   status: { over: false },
   hintOptions: null,
@@ -528,6 +621,8 @@ function resetGame() {
   state.turn = "red";
   state.selected = null;
   state.history = [];
+  state.positionKeys = [positionKey(state.board, state.turn)];
+  state.moveRecords = [];
   state.lastMove = null;
   state.status = { over: false };
   state.hintOptions = null;
@@ -539,6 +634,7 @@ function resetGame() {
 function applyMove(from, to) {
   const movingPiece = state.board[from.row][from.col];
   if (!movingPiece) return;
+  const isChaseMove = moveIsChase(state.board, from, to);
   const next = cloneBoard(state.board);
   next[to.row][to.col] = movingPiece;
   next[from.row][from.col] = null;
@@ -553,12 +649,23 @@ function applyMove(from, to) {
 
   const nextTurn = otherColor(moverColor);
   state.turn = nextTurn;
+  const isCheckMove = isInCheck(next, nextTurn);
+
+  state.positionKeys.push(positionKey(next, nextTurn));
+  state.moveRecords.push({ color: moverColor, isCheck: isCheckMove, isChase: isChaseMove });
 
   if (!hasAnyLegalMove(next, nextTurn)) {
-    const reason = isInCheck(next, nextTurn) ? "checkmate" : "stalemate";
+    const reason = isCheckMove ? "checkmate" : "stalemate";
     state.status = { over: true, winner: moverColor, reason };
   } else {
-    state.status = { over: false };
+    const verdict = evaluateRepetition();
+    if (verdict && verdict.type === "loss") {
+      state.status = { over: true, winner: otherColor(verdict.loser), reason: verdict.reason };
+    } else if (verdict && verdict.type === "draw") {
+      state.status = { over: true, winner: null, reason: verdict.reason };
+    } else {
+      state.status = { over: false };
+    }
   }
 
   if (state.mode === "online" && !applyingRemoteMove) {
@@ -575,6 +682,8 @@ function undoMove() {
   state.board = prev.board;
   state.turn = prev.turn;
   state.history = state.history.slice(0, -stepsBack);
+  state.positionKeys = state.positionKeys.slice(0, -stepsBack);
+  state.moveRecords = state.moveRecords.slice(0, -stepsBack);
   state.selected = null;
   state.lastMove = null;
   state.status = { over: false };
@@ -873,11 +982,14 @@ function renderHelpPanel() {
   if (!state.showHelp) return "";
   const pieceItems = PIECE_TIPS.map((p) => `<li><strong>${p.label}:</strong> ${p.tip}</li>`).join("");
   const strategyItems = STRATEGY_TIPS.map((t) => `<li>${t}</li>`).join("");
+  const ruleItems = GAME_END_RULES.map((r) => `<li><strong>${r.label}:</strong> ${r.tip}</li>`).join("");
   return `<div class="panel" style="text-align:left; max-width:640px;">
     <h3>Objective</h3>
     <p>Checkmate the enemy General, or leave your opponent with no legal move at all — both end the game immediately. Red always moves first.</p>
     <h3>How each piece moves</h3>
     <ul>${pieceItems}</ul>
+    <h3>How the game can end</h3>
+    <ul>${ruleItems}</ul>
     <h3>Tips for learning</h3>
     <ul style="list-style:disc;">${strategyItems}</ul>
   </div>`;
@@ -899,7 +1011,10 @@ function renderStatusPills() {
     html += `<div class="status-pill check">Check!</div>`;
   }
   if (state.status.over) {
-    html += `<div class="status-pill over">${state.status.winner === "red" ? "Red" : "Black"} wins by ${state.status.reason}</div>`;
+    const outcomeText = state.status.winner
+      ? `${state.status.winner === "red" ? "Red" : "Black"} wins by ${state.status.reason}`
+      : `Draw by ${state.status.reason}`;
+    html += `<div class="status-pill over">${outcomeText}</div>`;
   }
   html += `</div>`;
   return html;
