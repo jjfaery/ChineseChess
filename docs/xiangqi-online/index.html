@@ -448,94 +448,331 @@ function evaluateRepetition() {
   return { type: "draw", reason: "repetition" };
 }
 
-const HINT_SHORTLIST_SIZE = 8;
+// ---------------------------------------------------------------------------
+// Search engine — negamax with alpha-beta pruning, iterative deepening under
+// a wall-clock time budget, and a capture-only quiescence extension at the
+// horizon so the search doesn't misjudge a trade right at its depth limit.
+// A time budget (rather than a fixed depth) adapts to however expensive move
+// generation turns out to be in a given position, and lets the UI stay
+// responsive by yielding between depths. Shared by the computer's own moves
+// and by the hint/insight panel, so both "see" the position the same way.
+// ---------------------------------------------------------------------------
 
-function getTopMoves(board, color, count) {
-  const enemyColor = otherColor(color);
-  const candidates = [];
+const MATE_SCORE = 100000;
+const QUIESCENCE_MAX_PLIES = 4;
+const TIME_CHECK_INTERVAL = 512; // only poll the clock every N nodes, it's not free
+const MAX_SEARCH_DEPTH = 8;
 
+let searchDeadline = 0;
+let searchNodeCount = 0;
+let searchAborted = false;
+
+function searchTimeUp() {
+  searchNodeCount++;
+  if (searchNodeCount % TIME_CHECK_INTERVAL === 0 && Date.now() > searchDeadline) searchAborted = true;
+  return searchAborted;
+}
+
+// Positional weights are all small relative to material (soldier = 1), so
+// they only ever break ties between similarly-safe moves — they never
+// override a sound material judgment.
+function evaluate(board, color) {
+  let material = 0;
+  let positional = 0;
+
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      const piece = board[row][col];
+      if (!piece) continue;
+      const sign = piece.color === "red" ? 1 : -1;
+      material += sign * PIECE_VALUES[piece.type];
+
+      if (piece.type === "soldier") {
+        const traveled = piece.color === "red" ? 6 - row : row - 3;
+        const crossed = piece.color === "red" ? row <= 4 : row >= 5;
+        positional += sign * (crossed ? 0.15 + Math.max(0, traveled - 2) * 0.08 : Math.max(0, traveled) * 0.02);
+      } else if (piece.type === "horse") {
+        positional += sign * (4 - Math.abs(col - 4)) * 0.025; // centralized horses have more squares to jump to
+      } else if (piece.type === "chariot" || piece.type === "cannon") {
+        positional += sign * getPseudoMoves(board, { row, col }).length * 0.015; // open files / a platform to fire over
+      }
+    }
+  }
+
+  const score = material + positional;
+  return color === "red" ? score : -score;
+}
+
+function generateMoves(board, color) {
+  const moves = [];
   for (let row = 0; row < ROWS; row++) {
     for (let col = 0; col < COLS; col++) {
       const piece = board[row][col];
       if (!piece || piece.color !== color) continue;
       const from = { row, col };
       for (const to of getLegalMoves(board, from)) {
-        const captured = board[to.row][to.col];
-        const next = applyMoveToBoard(board, from, to);
-        const givesCheck = isInCheck(next, enemyColor);
-        const quickScore = (captured ? PIECE_VALUES[captured.type] * 10 : 0) + (givesCheck ? 6 : 0);
-        candidates.push({ from, to, piece, captured, givesCheck, next, quickScore });
+        moves.push({ from, to, piece, captured: board[to.row][to.col] });
       }
     }
   }
+  return moves;
+}
 
-  if (candidates.length === 0) return [];
+function sameMove(a, b) {
+  return !!a && !!b && a.from.row === b.from.row && a.from.col === b.from.col && a.to.row === b.to.row && a.to.col === b.to.col;
+}
 
-  candidates.sort((a, b) => b.quickScore - a.quickScore);
-  const shortlist = candidates.slice(0, HINT_SHORTLIST_SIZE);
-
-  for (const c of shortlist) {
-    const immediateMaterial = materialFor(c.next, color);
-    const reply = bestImmediateReply(c.next, enemyColor);
-
-    if (!reply) {
-      // Opponent has no legal reply at all: checkmate if we just gave
-      // check, otherwise we walked them into stalemate.
-      c.netMaterial = immediateMaterial + (c.givesCheck ? 1000 : -50);
-      c.hangs = false;
-      c.reply = null;
-      c.gameEnds = c.givesCheck ? "checkmate" : "stalemate";
-    } else {
-      c.netMaterial = materialFor(reply.resultingBoard, color);
-      c.hangs = c.netMaterial < immediateMaterial - 0.5;
-      c.reply = reply.move;
-      c.gameEnds = null;
+// MVV-LVA-ish ordering (most valuable victim, least valuable attacker) plus
+// an optional preferred move (e.g. last iteration's best) tried first — both
+// are cheap, board-data-only heuristics that make alpha-beta pruning far
+// more effective without needing to simulate every move just to rank it.
+function orderMoves(moves, preferredMove) {
+  return moves.slice().sort((a, b) => {
+    if (preferredMove) {
+      const aPref = sameMove(a, preferredMove), bPref = sameMove(b, preferredMove);
+      if (aPref !== bPref) return aPref ? -1 : 1;
     }
+    const aScore = a.captured ? PIECE_VALUES[a.captured.type] * 10 - PIECE_VALUES[a.piece.type] : 0;
+    const bScore = b.captured ? PIECE_VALUES[b.captured.type] * 10 - PIECE_VALUES[b.piece.type] : 0;
+    return bScore - aScore;
+  });
+}
 
-    c.finalScore = c.netMaterial * 10 + (c.givesCheck ? 3 : 0) + Math.random() * 0.3;
+function quiescence(board, color, alpha, beta, plies) {
+  if (searchTimeUp()) return { score: evaluate(board, color), pv: [] };
+
+  const standPat = evaluate(board, color);
+  if (standPat >= beta) return { score: standPat, pv: [] };
+  let bestScore = Math.max(alpha, standPat);
+  if (plies <= 0) return { score: bestScore, pv: [] };
+
+  const captures = orderMoves(generateMoves(board, color).filter((m) => m.captured), null);
+  let bestPV = [];
+  for (const m of captures) {
+    if (searchTimeUp()) break;
+    const next = applyMoveToBoard(board, m.from, m.to);
+    const child = quiescence(next, otherColor(color), -beta, -bestScore, plies - 1);
+    const score = -child.score;
+    if (score > bestScore) {
+      bestScore = score;
+      bestPV = [m, ...child.pv];
+    }
+    if (bestScore >= beta) break;
+  }
+  return { score: bestScore, pv: bestPV };
+}
+
+function negamax(board, color, depth, alpha, beta) {
+  if (searchTimeUp()) return { score: evaluate(board, color), pv: [] };
+
+  const moves = generateMoves(board, color);
+  if (moves.length === 0) {
+    // No legal moves is always a loss for `color` in Xiangqi (no stalemate
+    // draw) — depth-adjust so the search prefers a forced mate that lands
+    // sooner over one further away, and prefers delaying an inevitable loss.
+    return { score: -(MATE_SCORE - depth), pv: [] };
+  }
+  if (depth <= 0) {
+    return quiescence(board, color, alpha, beta, QUIESCENCE_MAX_PLIES);
   }
 
-  shortlist.sort((a, b) => b.finalScore - a.finalScore);
-  return shortlist.slice(0, count).map((c) => ({ ...c, explanation: explainCandidate(c) }));
+  const ordered = orderMoves(moves, null);
+  let bestScore = -Infinity;
+  let bestPV = [];
+  for (const m of ordered) {
+    if (searchTimeUp()) break;
+    const next = applyMoveToBoard(board, m.from, m.to);
+    const child = negamax(next, otherColor(color), depth - 1, -beta, -alpha);
+    const score = -child.score;
+    if (score > bestScore) {
+      bestScore = score;
+      bestPV = [m, ...child.pv];
+    }
+    if (bestScore > alpha) alpha = bestScore;
+    if (alpha >= beta) break;
+  }
+  return { score: bestScore, pv: bestPV };
+}
+
+// Iterative deepening driver: searches depth 1, then 2, then 3, ... until
+// the time budget runs out, always keeping the last FULLY completed depth's
+// result (a depth that ran out of time partway through comparing root moves
+// is discarded — its "best" move would just be whichever was tried first,
+// not a fair comparison). Yields between depths so a long search doesn't
+// block the UI in one uninterrupted chunk.
+async function searchPosition(board, color, timeBudgetMs) {
+  const rootMoves = generateMoves(board, color);
+  if (rootMoves.length === 0) return { bestMove: null, pv: [], rankedMoves: [], depthReached: 0 };
+  if (rootMoves.length === 1) {
+    // No real decision to make, but callers (like the hint pipeline) still
+    // rely on getting a genuine evaluation back — a hardcoded placeholder
+    // score here would silently corrupt their "does this hang material"
+    // comparisons, so still score the resulting position for real.
+    const only = rootMoves[0];
+    const next = applyMoveToBoard(board, only.from, only.to);
+    const { score } = quiescence(next, otherColor(color), -Infinity, Infinity, QUIESCENCE_MAX_PLIES);
+    return { bestMove: only, pv: [only], rankedMoves: [{ move: only, score: -score }], depthReached: 0 };
+  }
+
+  searchDeadline = Date.now() + timeBudgetMs;
+  searchNodeCount = 0;
+  searchAborted = false;
+
+  let bestMove = rootMoves[0];
+  let bestPV = [rootMoves[0]];
+  let rankedMoves = rootMoves.map((m) => ({ move: m, score: 0 }));
+  let depthReached = 0;
+
+  for (let depth = 1; depth <= MAX_SEARCH_DEPTH; depth++) {
+    let alpha = -Infinity;
+    let depthBestScore = -Infinity;
+    let depthBestMove = null;
+    let depthBestPV = [];
+    const depthRanked = [];
+    let completedAllMoves = true;
+
+    for (const m of orderMoves(rootMoves, bestMove)) {
+      if (searchAborted || Date.now() > searchDeadline) { completedAllMoves = false; break; }
+      const next = applyMoveToBoard(board, m.from, m.to);
+      const child = negamax(next, otherColor(color), depth - 1, -Infinity, -alpha);
+      const score = -child.score;
+      depthRanked.push({ move: m, score });
+      if (score > depthBestScore) {
+        depthBestScore = score;
+        depthBestMove = m;
+        depthBestPV = [m, ...child.pv];
+      }
+      if (score > alpha) alpha = score;
+    }
+
+    if (!completedAllMoves || !depthBestMove) break;
+    bestMove = depthBestMove;
+    bestPV = depthBestPV;
+    rankedMoves = depthRanked.sort((a, b) => b.score - a.score);
+    depthReached = depth;
+
+    if (Date.now() > searchDeadline) break;
+    if (depthBestScore >= MATE_SCORE - MAX_SEARCH_DEPTH) break; // forced mate found, no need to go deeper
+    await new Promise((resolve) => setTimeout(resolve, 0)); // let the UI breathe between depths
+  }
+
+  return { bestMove, pv: bestPV, rankedMoves, depthReached };
+}
+
+const DIFFICULTY_PRESETS = {
+  beginner: { label: "Beginner", timeBudgetMs: 250, mistakeChance: 0.3 },
+  intermediate: { label: "Intermediate", timeBudgetMs: 700, mistakeChance: 0 },
+  advanced: { label: "Advanced", timeBudgetMs: 2200, mistakeChance: 0 },
+};
+
+// ---------------------------------------------------------------------------
+// Hints — ranked, explained move options for the player to learn from.
+// ---------------------------------------------------------------------------
+
+const HINT_SHORTLIST_SIZE = 6;
+const HINT_PER_CANDIDATE_BUDGET_MS = 150;
+
+function positionalNote(piece, from, to) {
+  if (piece.type === "soldier") {
+    const crossedNow = piece.color === "red" ? to.row <= 4 : to.row >= 5;
+    const crossedBefore = piece.color === "red" ? from.row <= 4 : from.row >= 5;
+    if (crossedNow && !crossedBefore) return "crosses the river — it can now also step sideways, and becomes far more dangerous";
+  } else if (piece.type === "horse") {
+    const centralBefore = 4 - Math.abs(from.col - 4);
+    const centralAfter = 4 - Math.abs(to.col - 4);
+    if (centralAfter > centralBefore + 0.5) return "centralizes the Horse, giving it more squares to jump to next time";
+  }
+  return null;
+}
+
+function describeFollowUp(c) {
+  if (!c.opponentReply) return "";
+  let text = ` Likely follow-up: opponent plays ${squareLabel(c.opponentReply.from)}→${squareLabel(c.opponentReply.to)}`;
+  if (c.pv.length > 1) {
+    const nextOwn = c.pv[1];
+    text += `, then you could continue ${squareLabel(nextOwn.from)}→${squareLabel(nextOwn.to)}`;
+  }
+  return text + ".";
 }
 
 function explainCandidate(c) {
   const pieceLabel = PIECE_NAMES[c.piece.type];
+  const note = positionalNote(c.piece, c.from, c.to);
+  const noteSuffix = note ? ` This also ${note}.` : "";
+  const followUp = describeFollowUp(c);
+  let tag, base;
 
   if (c.gameEnds === "checkmate") {
-    return { tag: "Checkmate", text: "Delivers checkmate — the game ends immediately." };
+    tag = "Checkmate";
+    base = "Delivers checkmate — the game ends immediately.";
+  } else if (c.gameEnds === "stalemate") {
+    tag = "Wins — opponent has no moves";
+    base = "Leaves the opponent with no legal move at all — in Xiangqi that's an immediate win for you, not a draw.";
+  } else if (c.captured && !c.hangs) {
+    tag = "Wins material";
+    base = `Captures the enemy ${PIECE_NAMES[c.captured.type]} — even looking a few moves ahead, there's no reply that wins it back.`;
+  } else if (c.captured && c.hangs) {
+    tag = "Trade — check the math";
+    base = `Captures the enemy ${PIECE_NAMES[c.captured.type]}, but looking ahead the opponent has a follow-up that comes out ahead — only worth it if you're fine with that trade.`;
+  } else if (c.givesCheck && !c.hangs) {
+    tag = "Forcing";
+    base = "Puts the enemy General in check, forcing an immediate response and handing you the initiative.";
+  } else if (c.hangs) {
+    tag = "Risky";
+    base = `Creates pressure, but a few moves ahead the opponent has a way to come out on top from it.`;
+  } else {
+    tag = "Developing";
+    base = `A quiet developing move for your ${pieceLabel} — no immediate tactics, but the resulting position is measurably healthier.`;
   }
-  if (c.gameEnds === "stalemate") {
-    return { tag: "Forces stalemate", text: "Leaves the opponent with no legal move at all, ending the game by stalemate." };
+
+  return { tag, text: base + noteSuffix + followUp };
+}
+
+async function getInsightOptions(board, color, count) {
+  const enemyColor = otherColor(color);
+  const legalMoves = generateMoves(board, color);
+  if (legalMoves.length === 0) return [];
+
+  // Quick, cheap heuristic shortlist first, so the expensive per-candidate
+  // search below only runs on a handful of promising moves, not all of them.
+  const scored = legalMoves.map((m) => {
+    const next = applyMoveToBoard(board, m.from, m.to);
+    const givesCheck = isInCheck(next, enemyColor);
+    const quickScore = (m.captured ? PIECE_VALUES[m.captured.type] * 10 : 0) + (givesCheck ? 6 : 0) + evaluate(next, color) * 0.1;
+    return { ...m, next, givesCheck, quickScore };
+  });
+  scored.sort((a, b) => b.quickScore - a.quickScore);
+  const shortlist = scored.slice(0, HINT_SHORTLIST_SIZE);
+
+  const results = [];
+  for (const c of shortlist) {
+    const immediateScore = evaluate(c.next, color);
+    const search = await searchPosition(c.next, enemyColor, HINT_PER_CANDIDATE_BUDGET_MS);
+
+    let netScore, opponentReply, pv, gameEnds;
+    if (!search.bestMove) {
+      // Opponent has no legal reply at all — an unconditional win for us
+      // either way, since Xiangqi has no stalemate draw.
+      netScore = MATE_SCORE - 1;
+      opponentReply = null;
+      pv = [];
+      gameEnds = c.givesCheck ? "checkmate" : "stalemate";
+    } else {
+      netScore = -search.rankedMoves[0].score;
+      opponentReply = search.bestMove;
+      pv = search.pv;
+      gameEnds = null;
+    }
+
+    const hangs = netScore < immediateScore - 0.5;
+    results.push({
+      from: c.from, to: c.to, piece: c.piece, captured: c.captured, givesCheck: c.givesCheck,
+      gameEnds, netScore, hangs, opponentReply, pv,
+    });
   }
-  if (c.captured && !c.hangs) {
-    return {
-      tag: "Wins material",
-      text: `Captures the enemy ${PIECE_NAMES[c.captured.type]} — the opponent has no reply that wins it back, a clean material gain.`,
-    };
-  }
-  if (c.captured && c.hangs) {
-    return {
-      tag: "Trade — check the math",
-      text: `Captures the enemy ${PIECE_NAMES[c.captured.type]}, but the opponent can reply by taking your ${pieceLabel} back — worth playing only if that trade favors you.`,
-    };
-  }
-  if (c.givesCheck && !c.hangs) {
-    return {
-      tag: "Forcing",
-      text: "Puts the enemy General in check, forcing an immediate response and handing you the initiative.",
-    };
-  }
-  if (c.hangs) {
-    return {
-      tag: "Risky",
-      text: `Creates pressure, but leaves your ${pieceLabel} exposed — the opponent's best reply wins it back.`,
-    };
-  }
-  return {
-    tag: "Developing",
-    text: `A quiet developing move for your ${pieceLabel} — no immediate tactics, but it improves your position for later.`,
-  };
+
+  results.sort((a, b) => b.netScore - a.netScore);
+  return results.slice(0, count).map((c) => ({ ...c, explanation: explainCandidate(c) }));
 }
 
 // ---------------------------------------------------------------------------
@@ -588,6 +825,7 @@ function y(row) { return MARGIN + row * CELL; }
 const state = {
   mode: "two-player", // "two-player" | "vs-computer" | "online"
   humanColor: "red",
+  computerDifficulty: "intermediate", // "beginner" | "intermediate" | "advanced"
   board: createInitialBoard(),
   turn: "red",
   selected: null,
@@ -598,6 +836,7 @@ const state = {
   status: { over: false },
   hintOptions: null,
   hintHighlightIndex: 0,
+  hintThinking: false,
   showHelp: false,
   thinking: false,
   linkCopied: false,
@@ -627,6 +866,7 @@ function resetGame() {
   state.status = { over: false };
   state.hintOptions = null;
   state.hintHighlightIndex = 0;
+  state.hintThinking = false;
   state.thinking = false;
   render();
 }
@@ -693,7 +933,7 @@ function undoMove() {
 }
 
 function handleSquareClick(row, col) {
-  if (state.status.over || state.thinking) return;
+  if (state.status.over || state.thinking || state.hintThinking) return;
   const cc = computerColor();
   if (cc && state.turn === cc) return;
   if (state.mode === "online" && (state.online.status !== "connected" || state.turn !== state.online.color)) return;
@@ -723,11 +963,15 @@ function handleSquareClick(row, col) {
   }
 }
 
-function requestHint() {
-  if (state.status.over || state.thinking) return;
+async function requestHint() {
+  if (state.status.over || state.thinking || state.hintThinking) return;
   const cc = computerColor();
   if (cc && state.turn === cc) return;
-  state.hintOptions = getTopMoves(state.board, state.turn, 3);
+  state.hintThinking = true;
+  render();
+  const options = await getInsightOptions(state.board, state.turn, 3);
+  state.hintThinking = false;
+  state.hintOptions = options;
   state.hintHighlightIndex = 0;
   render();
 }
@@ -738,17 +982,26 @@ function selectHintOption(index) {
   render();
 }
 
-function maybeTriggerComputerMove() {
+async function maybeTriggerComputerMove() {
   const cc = computerColor();
   if (!cc || state.turn !== cc || state.status.over || state.thinking) return;
   state.thinking = true;
   render();
-  setTimeout(() => {
-    const options = getTopMoves(state.board, cc, 1);
-    state.thinking = false;
-    if (options.length > 0) applyMove(options[0].from, options[0].to);
-    else render();
-  }, 500);
+  await new Promise((resolve) => setTimeout(resolve, 200)); // brief pause so a move never feels instant/jarring
+
+  const preset = DIFFICULTY_PRESETS[state.computerDifficulty] || DIFFICULTY_PRESETS.intermediate;
+  const legalMoves = generateMoves(state.board, cc);
+  let chosen = null;
+  if (legalMoves.length > 0 && Math.random() < preset.mistakeChance) {
+    chosen = legalMoves[Math.floor(Math.random() * legalMoves.length)];
+  } else {
+    const result = await searchPosition(state.board, cc, preset.timeBudgetMs);
+    chosen = result.bestMove;
+  }
+
+  state.thinking = false;
+  if (chosen) applyMove(chosen.from, chosen.to);
+  else render();
 }
 
 function changeMode(nextMode) {
@@ -761,6 +1014,12 @@ function changeMode(nextMode) {
 function changeHumanColor(color) {
   state.humanColor = color;
   resetGame();
+}
+
+function changeDifficulty(level) {
+  if (!DIFFICULTY_PRESETS[level] || state.computerDifficulty === level) return;
+  state.computerDifficulty = level;
+  render();
 }
 
 function toggleHelp() {
@@ -942,6 +1201,9 @@ function renderModeTabs() {
       <button class="${state.humanColor === "red" ? "active red" : ""}" onclick="changeHumanColor('red')">Play Red</button>
       <button class="${state.humanColor === "black" ? "active" : ""}" onclick="changeHumanColor('black')">Play Black</button>
     </div>`;
+    const diffBtn = (level) =>
+      `<button class="${state.computerDifficulty === level ? "active" : ""}" onclick="changeDifficulty('${level}')">${DIFFICULTY_PRESETS[level].label}</button>`;
+    html += `<div class="tabgroup">${diffBtn("beginner")}${diffBtn("intermediate")}${diffBtn("advanced")}</div>`;
   }
 
   html += `<button class="pill-btn" onclick="toggleHelp()">${state.showHelp ? "Hide Rules" : "How to Play"}</button>`;
@@ -1096,11 +1358,11 @@ function renderControls() {
   if (!hasActiveOnlineRoom) return "";
 
   const cc = computerColor();
-  const hintDisabled = state.status.over || state.thinking || (cc !== null && state.turn === cc);
-  const undoDisabled = state.history.length === 0 || state.thinking || state.status.over;
+  const hintDisabled = state.status.over || state.thinking || state.hintThinking || (cc !== null && state.turn === cc);
+  const undoDisabled = state.history.length === 0 || state.thinking || state.hintThinking || state.status.over;
 
   let html = `<div class="row">
-    <button class="pill-btn amber" ${hintDisabled ? "disabled" : ""} onclick="requestHint()">Hint</button>`;
+    <button class="pill-btn amber" ${hintDisabled ? "disabled" : ""} onclick="requestHint()">${state.hintThinking ? "Thinking…" : "Hint"}</button>`;
 
   if (state.mode !== "online") {
     html += `<button class="pill-btn" ${undoDisabled ? "disabled" : ""} onclick="undoMove()">Undo</button>`;
