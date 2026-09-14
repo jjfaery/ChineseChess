@@ -823,9 +823,12 @@ function y(row) { return MARGIN + row * CELL; }
 // ---------------------------------------------------------------------------
 
 const state = {
-  mode: "two-player", // "two-player" | "vs-computer" | "online"
+  mode: "two-player", // "two-player" | "vs-computer" | "online" | "learn"
   humanColor: "red",
   computerDifficulty: "intermediate", // "beginner" | "intermediate" | "advanced"
+  learnPiece: "general",
+  learnBoard: null,
+  learnFocus: null,
   board: createInitialBoard(),
   turn: "red",
   selected: null,
@@ -849,6 +852,95 @@ let applyingRemoteMove = false;
 
 function computerColor() {
   return state.mode === "vs-computer" ? otherColor(state.humanColor) : null;
+}
+
+// ---------------------------------------------------------------------------
+// Learn mode — an interactive sandbox, one piece at a time. Each lesson
+// drops the piece (plus, where the rule calls for it, a blocker or a
+// capturable enemy) onto a fresh board so its legal moves — highlighted the
+// same way as in a real game — show the rule directly instead of just
+// describing it. The player can actually move the piece around and watch
+// its options update live.
+// ---------------------------------------------------------------------------
+
+const LEARN_PIECE_ORDER = ["general", "advisor", "elephant", "horse", "chariot", "cannon", "soldier"];
+
+const LEARN_NOTES = {
+  general: "Try moving it — notice it can never step outside the palace (the 3×3 box marked with an X).",
+  advisor: "It only ever touches the palace's 5 marked points, moving one step diagonally.",
+  elephant: "A blocker sits on one of its \"eye\" squares — notice one of its four diagonal jumps is missing because that square is occupied. Elephants also can never cross the river.",
+  horse: "A blocker sits next to the Horse — notice the two jumps in that direction are missing (\"hobbling the horse's leg\"). Move the Horse elsewhere and watch its options change.",
+  chariot: "It slides until it hits something: a solid ring means a capturable enemy piece, a plain friendly piece just blocks it entirely.",
+  cannon: "The enemy piece two squares away can be captured by jumping over the piece in between — even though the Cannon can't normally move past it. That's the difference between the small dot and the solid ring.",
+  soldier: "It only moves forward — until it crosses the river, and then it can also step sideways. Walk it forward a few times and watch its options change the moment it crosses.",
+};
+
+function buildLearnSetup(pieceType) {
+  const board = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
+  let focus;
+  switch (pieceType) {
+    case "general":
+      focus = { row: 8, col: 4 };
+      board[8][4] = { type: "general", color: "red" };
+      break;
+    case "advisor":
+      focus = { row: 8, col: 4 };
+      board[8][4] = { type: "advisor", color: "red" };
+      break;
+    case "elephant":
+      focus = { row: 7, col: 4 };
+      board[7][4] = { type: "elephant", color: "red" };
+      board[8][5] = { type: "soldier", color: "red" }; // sits on the eye toward (9,6), blocking that jump
+      break;
+    case "horse":
+      focus = { row: 5, col: 4 };
+      board[5][4] = { type: "horse", color: "red" };
+      board[4][4] = { type: "soldier", color: "red" }; // blocks the leg toward (3,3) and (3,5)
+      break;
+    case "chariot":
+      focus = { row: 5, col: 4 };
+      board[5][4] = { type: "chariot", color: "red" };
+      board[5][7] = { type: "soldier", color: "red" }; // friendly piece blocks it outright
+      board[5][1] = { type: "soldier", color: "black" }; // enemy piece it can capture
+      break;
+    case "cannon":
+      focus = { row: 5, col: 4 };
+      board[5][4] = { type: "cannon", color: "red" };
+      board[5][6] = { type: "soldier", color: "black" }; // the screen it must jump
+      board[5][8] = { type: "soldier", color: "black" }; // capturable only by jumping the screen
+      break;
+    case "soldier":
+      focus = { row: 6, col: 4 };
+      board[6][4] = { type: "soldier", color: "red" };
+      break;
+  }
+  return { board, focus };
+}
+
+function selectLearnPiece(pieceType) {
+  if (!LEARN_PIECE_ORDER.includes(pieceType)) return;
+  state.learnPiece = pieceType;
+  const setup = buildLearnSetup(pieceType);
+  state.learnBoard = setup.board;
+  state.learnFocus = setup.focus;
+  render();
+}
+
+function resetLearnPosition() {
+  selectLearnPiece(state.learnPiece);
+}
+
+function handleLearnSquareClick(row, col) {
+  if (!state.learnBoard || !state.learnFocus) return;
+  const legal = getLegalMoves(state.learnBoard, state.learnFocus);
+  if (!legal.some((m) => m.row === row && m.col === col)) return;
+  const piece = state.learnBoard[state.learnFocus.row][state.learnFocus.col];
+  const next = cloneBoard(state.learnBoard);
+  next[row][col] = piece;
+  next[state.learnFocus.row][state.learnFocus.col] = null;
+  state.learnBoard = next;
+  state.learnFocus = { row, col };
+  render();
 }
 
 // ---------------------------------------------------------------------------
@@ -933,6 +1025,7 @@ function undoMove() {
 }
 
 function handleSquareClick(row, col) {
+  if (state.mode === "learn") { handleLearnSquareClick(row, col); return; }
   if (state.status.over || state.thinking || state.hintThinking) return;
   const cc = computerColor();
   if (cc && state.turn === cc) return;
@@ -1008,6 +1101,11 @@ function changeMode(nextMode) {
   if (nextMode === state.mode) return;
   if (state.mode === "online") teardownOnline();
   state.mode = nextMode;
+  if (nextMode === "learn") {
+    const setup = buildLearnSetup(state.learnPiece);
+    state.learnBoard = setup.board;
+    state.learnFocus = setup.focus;
+  }
   resetGame();
 }
 
@@ -1194,7 +1292,7 @@ function escapeAttr(s) {
 function renderModeTabs() {
   const modeBtn = (mode, label) =>
     `<button class="${state.mode === mode ? "active" : ""}" onclick="changeMode('${mode}')">${label}</button>`;
-  let html = `<div class="tabgroup">${modeBtn("two-player", "Two Players")}${modeBtn("vs-computer", "Vs Computer")}${modeBtn("online", "Play Online")}</div>`;
+  let html = `<div class="tabgroup">${modeBtn("two-player", "Two Players")}${modeBtn("vs-computer", "Vs Computer")}${modeBtn("online", "Play Online")}${modeBtn("learn", "Learn to Play")}</div>`;
 
   if (state.mode === "vs-computer") {
     html += `<div class="tabgroup">
@@ -1208,6 +1306,29 @@ function renderModeTabs() {
 
   html += `<button class="pill-btn" onclick="toggleHelp()">${state.showHelp ? "Hide Rules" : "How to Play"}</button>`;
   return html;
+}
+
+function renderLearnPanel() {
+  const pieceButtons = LEARN_PIECE_ORDER.map((type) => {
+    const active = state.learnPiece === type;
+    return `<button class="pill-btn ${active ? "primary" : ""}" onclick="selectLearnPiece('${type}')">${PIECE_NAMES[type]}</button>`;
+  }).join("");
+
+  const info = PIECE_TIPS.find((p) => p.type === state.learnPiece);
+  const note = LEARN_NOTES[state.learnPiece];
+
+  return `
+    <div class="row">${pieceButtons}</div>
+    <div class="panel center">
+      <h3>${info.label}</h3>
+      <p>${info.tip}</p>
+      <p class="amber" style="font-size:0.8rem;">${note}</p>
+    </div>
+    ${renderLearnBoard()}
+    <div class="row">
+      <button class="pill-btn" onclick="resetLearnPosition()">Reset Position</button>
+    </div>
+  `;
 }
 
 function renderOnlinePanel() {
@@ -1286,7 +1407,10 @@ function renderBoard() {
   const { board, selected, lastMove, hintOptions, hintHighlightIndex } = state;
   const legalMoves = selected ? getLegalMoves(board, selected) : [];
   const activeHint = hintOptions ? hintOptions[hintHighlightIndex] : null;
+  return renderBoardSVG({ board, selected, legalMoves, lastMove, hint: activeHint });
+}
 
+function renderBoardSVG({ board, selected, legalMoves, lastMove, hint }) {
   let lines = "";
   for (let row = 0; row < ROWS; row++) {
     lines += `<line x1="${x(0)}" y1="${y(row)}" x2="${x(COLS - 1)}" y2="${y(row)}" stroke="#5c4326" stroke-width="1.5" />`;
@@ -1318,9 +1442,9 @@ function renderBoard() {
     <circle cx="${x(lastMove.to.col)}" cy="${y(lastMove.to.row)}" r="${CELL / 2 - 6}" fill="none" stroke="#2563eb" stroke-width="2" opacity="0.6" />
   ` : "";
 
-  const hintHtml = activeHint ? `
-    <circle cx="${x(activeHint.from.col)}" cy="${y(activeHint.from.row)}" r="${CELL / 2 - 3}" fill="none" stroke="#f59e0b" stroke-width="3" stroke-dasharray="5 4" />
-    <circle cx="${x(activeHint.to.col)}" cy="${y(activeHint.to.row)}" r="${CELL / 2 - 3}" fill="none" stroke="#f59e0b" stroke-width="3" />
+  const hintHtml = hint ? `
+    <circle cx="${x(hint.from.col)}" cy="${y(hint.from.row)}" r="${CELL / 2 - 3}" fill="none" stroke="#f59e0b" stroke-width="3" stroke-dasharray="5 4" />
+    <circle cx="${x(hint.to.col)}" cy="${y(hint.to.row)}" r="${CELL / 2 - 3}" fill="none" stroke="#f59e0b" stroke-width="3" />
   ` : "";
 
   const legalHtml = legalMoves.map((m) => {
@@ -1351,6 +1475,13 @@ function renderBoard() {
       ${lines}${palace}${river}${lastMoveHtml}${hintHtml}${legalHtml}${squaresHtml}
     </svg>
   </div>`;
+}
+
+function renderLearnBoard() {
+  const board = state.learnBoard;
+  const focus = state.learnFocus;
+  const legalMoves = getLegalMoves(board, focus);
+  return renderBoardSVG({ board, selected: focus, legalMoves, lastMove: null, hint: null });
 }
 
 function renderControls() {
@@ -1417,15 +1548,12 @@ function renderFooterCaption() {
 
 function render() {
   const app = document.getElementById("app");
+  const body = state.mode === "learn"
+    ? `${renderHelpPanel()}${renderLearnPanel()}`
+    : `${renderOnlinePanel()}${renderHelpPanel()}${renderStatusPills()}${renderBoard()}${renderControls()}${renderHintPanel()}${renderFooterCaption()}`;
   app.innerHTML = `
     <div class="row">${renderModeTabs()}</div>
-    ${renderOnlinePanel()}
-    ${renderHelpPanel()}
-    ${renderStatusPills()}
-    ${renderBoard()}
-    ${renderControls()}
-    ${renderHintPanel()}
-    ${renderFooterCaption()}
+    ${body}
   `;
   maybeTriggerComputerMove();
 }
